@@ -1,0 +1,668 @@
+<style>
+  .wrapper {
+    overflow-y:scroll;
+}
+
+iframe {}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border-left-color: #09f;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loading {
+    margin: 20px 0;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.marks-section {
+    margin: 20px 0;
+}
+
+.debug-info {
+    background-color: #e8f5e9;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-family: monospace;
+}
+
+.table-debug {
+    background-color: #f5f5f5;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 5px 0 10px 0;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.marks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.marks-table th, .marks-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.marks-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.marks-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#debug-log {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+</style>
+
+<div>
+    <div class="viz-info">
+        <p><strong>Viz ID:</strong> <span id="viz-id">content-1-40cc6cc7-1b77-4059-b2fc-2e259a31e589</span></p>
+    </div>
+    
+    <button id="get-selected-marks-btn">Get Selected Marks</button>
+    <button id="debug-btn">Debug Viz</button>
+    
+    <div id="loading" style="display: none;">
+        <div class="spinner"></div> Loading...
+    </div>
+    
+    <div id="error-container"></div>
+    
+    <div class="marks-section">
+        <h3>Selected Marks</h3>
+        <div id="selected-marks">
+            <p>Select marks in the visualization or click the button above to fetch selected marks.</p>
+        </div>
+    </div>
+    
+    <div id="debug-output" style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px;">
+        <h3>Debug Output</h3>
+        <pre id="debug-log" style="background-color: #f5f5f5; padding: 10px; overflow: auto; max-height: 300px;"></pre>
+    </div>
+</div>
+
+<script>
+    // Debug logging function
+    function debugLog(message, data) {
+        const debugLogElement = document.getElementById('debug-log');
+        const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+        
+        let logMessage = `[${timestamp}] ${message}`;
+        
+        if (data !== undefined) {
+            try {
+                if (typeof data === 'object') {
+                    logMessage += `: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    logMessage += `: ${data}`;
+                }
+            } catch (e) {
+                logMessage += `: [Object could not be stringified]`;
+            }
+        }
+        
+        debugLogElement.textContent += logMessage + '\n';
+        console.log(message, data);
+    }
+    
+    // Get DOM elements
+    const getSelectedMarksBtn = document.getElementById('get-selected-marks-btn');
+    const debugBtn = document.getElementById('debug-btn');
+    const loadingIndicator = document.getElementById('loading');
+    const errorContainer = document.getElementById('error-container');
+    const selectedMarksContainer = document.getElementById('selected-marks');
+    const vizIdElement = document.getElementById('viz-id');
+    
+    // Store the viz object globally for reuse
+    let cachedViz = null;
+    
+    // Get the viz object
+    function getTableauViz(vizId) {
+        return new Promise((resolve, reject) => {
+            try {
+                debugLog('Getting Tableau viz with ID', vizId);
+                
+                if (typeof zPortal === 'undefined') {
+                    debugLog('Error: zPortal is not defined');
+                    reject(new Error('zPortal is not defined. Cannot fetch Tableau data.'));
+                    return;
+                }
+                
+                if (typeof zPortal.tableau === 'undefined') {
+                    debugLog('Error: zPortal.tableau is not defined');
+                    reject(new Error('zPortal.tableau is not defined. Cannot fetch Tableau data.'));
+                    return;
+                }
+                
+                // Use cached viz if available
+                if (cachedViz) {
+                    debugLog('Using cached viz');
+                    resolve(cachedViz);
+                    return;
+                }
+                
+                debugLog('Calling zPortal.tableau.getViz');
+                const viz = zPortal.tableau.getViz(vizId);
+                debugLog('Got viz object', viz ? 'Successfully' : 'Failed');
+                
+                if (!viz) {
+                    debugLog('Error: viz is null or undefined');
+                    reject(new Error('Failed to get viz object. It returned null or undefined.'));
+                    return;
+                }
+                
+                // Cache the viz for future use
+                cachedViz = viz;
+                
+                // Try to set up mark selection listener if TableauEventType is available
+                if (window.TableauAPI && window.TableauAPI.TableauEventType) {
+                    debugLog('Setting up mark selection event listener');
+                    try {
+                        viz.addEventListener(window.TableauAPI.TableauEventType.MarkSelectionChanged, handleMarkSelectionChanged);
+                        debugLog('Mark selection event listener added successfully');
+                    } catch (listenerError) {
+                        debugLog('Error adding event listener', listenerError.message);
+                    }
+                } else {
+                    debugLog('TableauEventType not available, skipping event listener setup');
+                }
+                
+                resolve(viz);
+            } catch (error) {
+                debugLog('Error in getTableauViz', error.message);
+                reject(error);
+            }
+        });
+    }
+    
+    // Function to handle mark selection change events
+    async function handleMarkSelectionChanged(event) {
+        try {
+            debugLog('Mark selection changed event received', event);
+            
+            // Get the marks from the event
+            const marksCollection = await event.detail.getMarksAsync();
+            debugLog('Selected marks from event', marksCollection);
+            
+            // Display the selected marks
+            displaySelectedMarksData(marksCollection);
+        } catch (error) {
+            debugLog('Error handling mark selection change', error.message);
+            selectedMarksContainer.innerHTML = `<p>Error getting selected marks: ${error.message}</p>`;
+        }
+    }
+    
+    // Function to get selected marks from a worksheet
+    async function getSelectedMarksFromWorksheet(worksheet) {
+        try {
+            const sheetName = worksheet.name || 
+                             (typeof worksheet.getName === 'function' ? 
+                              worksheet.getName() : 'Unknown');
+            
+            debugLog(`Getting selected marks for worksheet`, sheetName);
+            
+            // Check if getSelectedMarksAsync method exists
+            if (typeof worksheet.getSelectedMarksAsync !== 'function') {
+                debugLog(`getSelectedMarksAsync not available for worksheet ${sheetName}`);
+                return null;
+            }
+            
+            const selectedMarks = await worksheet.getSelectedMarksAsync();
+            debugLog(`Found selected marks for ${sheetName}`, selectedMarks);
+            
+            return selectedMarks;
+        } catch (error) {
+            debugLog(`Error getting selected marks from worksheet`, error.message);
+            return null;
+        }
+    }
+    
+    // Function to get all selected marks from all worksheets
+    async function getAllSelectedMarks(viz) {
+        try {
+            debugLog('Getting all selected marks');
+            
+            // Get the viz object
+            let workbook = null;
+            
+            if (viz.workbook) {
+                workbook = viz.workbook;
+                debugLog('Found workbook directly on viz object');
+            } else if (typeof viz.getWorkbook === 'function') {
+                workbook = viz.getWorkbook();
+                debugLog('Got workbook using getWorkbook() method');
+            } else {
+                debugLog('Could not find workbook on viz object');
+                throw new Error('Could not find workbook.');
+            }
+            
+            if (!workbook) {
+                debugLog('Workbook is null or undefined');
+                throw new Error('Workbook is null or undefined.');
+            }
+            
+            // Get active sheet
+            let activeSheet = null;
+            
+            if (workbook.activeSheet) {
+                activeSheet = workbook.activeSheet;
+                debugLog('Found activeSheet directly on workbook object');
+            } else if (typeof workbook.getActiveSheet === 'function') {
+                activeSheet = workbook.getActiveSheet();
+                debugLog('Got activeSheet using getActiveSheet() method');
+            } else {
+                debugLog('Could not find activeSheet on workbook object');
+                throw new Error('Could not find active sheet.');
+            }
+            
+            if (!activeSheet) {
+                debugLog('ActiveSheet is null or undefined');
+                throw new Error('ActiveSheet is null or undefined.');
+            }
+            
+            debugLog('Active sheet type', activeSheet.sheetType);
+            
+            // If active sheet is a worksheet, get selected marks directly
+            if (activeSheet.sheetType === 'worksheet') {
+                debugLog('Active sheet is a worksheet');
+                return await getSelectedMarksFromWorksheet(activeSheet);
+            }
+            
+            // If active sheet is a dashboard, get selected marks from all worksheets
+            if (activeSheet.sheetType === 'dashboard') {
+                debugLog('Active sheet is a dashboard');
+                
+                let worksheets = [];
+                
+                if (activeSheet.worksheets) {
+                    worksheets = activeSheet.worksheets;
+                    debugLog('Found worksheets directly on activeSheet object', worksheets.length);
+                } else if (typeof activeSheet.getWorksheets === 'function') {
+                    worksheets = activeSheet.getWorksheets();
+                    debugLog('Got worksheets using getWorksheets() method', worksheets.length);
+                } else {
+                    debugLog('Could not find worksheets on activeSheet object');
+                    throw new Error('Could not find worksheets.');
+                }
+                
+                if (!worksheets || worksheets.length === 0) {
+                    debugLog('No worksheets found in dashboard');
+                    return { data: [] };
+                }
+                
+                debugLog(`Found ${worksheets.length} worksheets in dashboard`);
+                
+                // Create an array to hold all selected marks
+                const allSelectedMarks = [];
+                const worksheetNames = [];
+                
+                // Try to get selected marks from each worksheet
+                for (const worksheet of worksheets) {
+                    const worksheetName = worksheet.name || 
+                                         (typeof worksheet.getName === 'function' ? 
+                                          worksheet.getName() : 'Unknown');
+                    
+                    worksheetNames.push(worksheetName);
+                    debugLog(`Checking worksheet`, worksheetName);
+                    
+                    const selectedMarks = await getSelectedMarksFromWorksheet(worksheet);
+                    
+                    // Check if we have actual data
+                    if (selectedMarks && selectedMarks.data && selectedMarks.data.length > 0) {
+                        debugLog(`Found data tables in worksheet ${worksheetName}`, selectedMarks.data.length);
+                        
+                        // Check if any data table has actual rows
+                        const hasData = selectedMarks.data.some(dataTable => 
+                            dataTable.data && dataTable.data.length > 0 && 
+                            dataTable.columns && dataTable.columns.length > 0
+                        );
+                        
+                        if (hasData) {
+                            debugLog(`Found actual data in worksheet ${worksheetName}`);
+                            // Add worksheet name to each data table for reference
+                            selectedMarks.data.forEach(dataTable => {
+                                dataTable._worksheetName = worksheetName;
+                            });
+                            allSelectedMarks.push(selectedMarks);
+                        } else {
+                            debugLog(`No actual data in worksheet ${worksheetName}`);
+                        }
+                    } else {
+                        debugLog(`No selected marks in worksheet ${worksheetName}`);
+                    }
+                }
+                
+                debugLog(`Checked worksheets`, worksheetNames);
+                debugLog(`Found data in ${allSelectedMarks.length} worksheets`);
+                
+                // If we found selected marks in any worksheet, combine them
+                if (allSelectedMarks.length > 0) {
+                    // Combine all data tables from all worksheets
+                    const combinedMarks = {
+                        data: allSelectedMarks.flatMap(marks => marks.data)
+                    };
+                    
+                    debugLog('Combined selected marks', combinedMarks.data.length);
+                    return combinedMarks;
+                }
+                
+                // If we didn't find any selected marks with data, return an empty result
+                debugLog('No selected marks found in any worksheet');
+                return { data: [] };
+            }
+            
+            debugLog('Active sheet is neither a worksheet nor a dashboard');
+            return null;
+        } catch (error) {
+            debugLog('Error getting all selected marks', error.message);
+            throw error;
+        }
+    }
+    
+    // Function to process and display selected marks data
+    function displaySelectedMarksData(marksCollection) {
+        debugLog('Displaying selected marks data');
+        
+        // Clear previous content
+        selectedMarksContainer.innerHTML = '';
+        
+        if (!marksCollection || !marksCollection.data || marksCollection.data.length === 0) {
+            selectedMarksContainer.innerHTML = '<p>No marks are currently selected in any worksheet.</p>';
+            debugLog('No marks to display');
+            return;
+        }
+        
+        debugLog('Found data tables', marksCollection.data.length);
+        
+        // Add debug information
+        const debugInfo = document.createElement('div');
+        debugInfo.className = 'debug-info';
+        debugInfo.innerHTML = `<p><strong>Debug:</strong> Found ${marksCollection.data.length} data tables in selection</p>`;
+        selectedMarksContainer.appendChild(debugInfo);
+        
+        // Check if we have empty data tables
+        let hasData = false;
+        
+        // Process each data table in the marks collection
+        marksCollection.data.forEach((dataTable, tableIndex) => {
+            debugLog(`Processing data table ${tableIndex}`, dataTable.name);
+            
+            const marksSection = document.createElement('div');
+            marksSection.className = 'marks-section';
+            
+            // Add data table title with worksheet name if available
+            const tableTitle = document.createElement('h4');
+            if (dataTable._worksheetName) {
+                tableTitle.textContent = `${dataTable._worksheetName}: ${dataTable.name || `Selection ${tableIndex + 1}`}`;
+            } else {
+                tableTitle.textContent = dataTable.name || `Selection ${tableIndex + 1}`;
+            }
+            marksSection.appendChild(tableTitle);
+            
+            // Add data table debug info
+            const tableDebug = document.createElement('div');
+            tableDebug.className = 'table-debug';
+            tableDebug.innerHTML = `
+                <p>Table: ${dataTable.name || 'Unnamed'}</p>
+                <p>Columns: ${dataTable.columns ? dataTable.columns.length : 0}</p>
+                <p>Rows: ${dataTable.data ? dataTable.data.length : 0}</p>
+                <p>Is Summary: ${dataTable.isSummaryData}</p>
+            `;
+            marksSection.appendChild(tableDebug);
+            
+            // Check if we have columns and data
+            if (!dataTable.columns || dataTable.columns.length === 0 || !dataTable.data || dataTable.data.length === 0) {
+                const noData = document.createElement('p');
+                noData.textContent = 'No data available in this selection.';
+                marksSection.appendChild(noData);
+                selectedMarksContainer.appendChild(marksSection);
+                debugLog(`No columns or data in table ${tableIndex}`);
+                return;
+            }
+            
+            hasData = true;
+            debugLog(`Table ${tableIndex} has data`, {
+                columns: dataTable.columns.length,
+                rows: dataTable.data.length
+            });
+            
+            // Create a table for the marks
+            const table = document.createElement('table');
+            table.className = 'marks-table';
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            dataTable.columns.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column.fieldName;
+                headerRow.appendChild(th);
+            });
+            
+            const thead = document.createElement('thead');
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create data rows
+            const tbody = document.createElement('tbody');
+            dataTable.data.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell.formattedValue || cell.value;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            
+            table.appendChild(tbody);
+            marksSection.appendChild(table);
+            selectedMarksContainer.appendChild(marksSection);
+        });
+        
+        // If we processed all tables but found no data
+        if (!hasData) {
+            const emptyNotice = document.createElement('p');
+            emptyNotice.innerHTML = '<strong>Note:</strong> Selection contains empty data tables. Try selecting different marks in the visualization.';
+            selectedMarksContainer.appendChild(emptyNotice);
+            debugLog('No actual data in any table');
+        }
+    }
+    
+    // Debug button click handler
+    debugBtn.addEventListener('click', async () => {
+        debugLog('Debug button clicked');
+        
+        try {
+            // Get viz ID from the page
+            const vizId = vizIdElement.textContent.trim();
+            debugLog('Viz ID', vizId);
+            
+            // Check if zPortal exists
+            if (typeof zPortal === 'undefined') {
+                debugLog('zPortal is not defined');
+            } else {
+                debugLog('zPortal exists');
+                
+                // Check if zPortal.tableau exists
+                if (typeof zPortal.tableau === 'undefined') {
+                    debugLog('zPortal.tableau is not defined');
+                } else {
+                    debugLog('zPortal.tableau exists');
+                    
+                    // Check if getViz method exists
+                    if (typeof zPortal.tableau.getViz !== 'function') {
+                        debugLog('zPortal.tableau.getViz is not a function');
+                    } else {
+                        debugLog('zPortal.tableau.getViz is a function');
+                        
+                        // Try to get the viz
+                        try {
+                            const viz = zPortal.tableau.getViz(vizId);
+                            debugLog('Got viz object', viz ? 'Successfully' : 'Failed');
+                            
+                            if (viz) {
+                                // Check viz properties
+                                debugLog('Viz properties', Object.keys(viz));
+                                
+                                // Check if workbook exists
+                                if (viz.workbook) {
+                                    debugLog('Workbook exists');
+                                    
+                                    // Check workbook properties
+                                    debugLog('Workbook properties', Object.keys(viz.workbook));
+                                    
+                                    // Check if activeSheet exists
+                                    if (viz.workbook.activeSheet) {
+                                        debugLog('ActiveSheet exists');
+                                        debugLog('ActiveSheet type', viz.workbook.activeSheet.sheetType);
+                                        
+                                        // If it's a dashboard, check worksheets
+                                        if (viz.workbook.activeSheet.sheetType === 'dashboard') {
+                                            if (viz.workbook.activeSheet.worksheets) {
+                                                debugLog('Worksheets exist', viz.workbook.activeSheet.worksheets.length);
+                                                
+                                                // Log worksheet names
+                                                const worksheetNames = viz.workbook.activeSheet.worksheets.map(ws => 
+                                                    ws.name || (typeof ws.getName === 'function' ? ws.getName() : 'Unknown')
+                                                );
+                                                debugLog('Worksheet names', worksheetNames);
+                                            } else {
+                                                debugLog('No worksheets found');
+                                            }
+                                        }
+                                    } else {
+                                        debugLog('ActiveSheet does not exist');
+                                    }
+                                } else {
+                                    debugLog('Workbook does not exist');
+                                }
+                            }
+                        } catch (vizError) {
+                            debugLog('Error getting viz', vizError.message);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            debugLog('Error in debug function', error.message);
+        }
+    });
+    
+    // Handle get selected marks button click
+    getSelectedMarksBtn.addEventListener('click', async () => {
+        debugLog('Get Selected Marks button clicked');
+        
+        // Clear previous errors
+        errorContainer.innerHTML = '';
+        
+        // Show loading indicator
+        loadingIndicator.style.display = 'block';
+        
+        // Disable button while loading
+        getSelectedMarksBtn.disabled = true;
+        
+        try {
+            // Get viz ID from the page
+            const vizId = vizIdElement.textContent.trim();
+            debugLog('Getting selected marks for viz', vizId);
+            
+            // Get the viz object
+            const viz = await getTableauViz(vizId);
+            debugLog('Got viz object successfully');
+            
+            // Get selected marks
+            const selectedMarks = await getAllSelectedMarks(viz);
+            debugLog('Got selected marks', selectedMarks);
+            
+            // Display selected marks
+            displaySelectedMarksData(selectedMarks);
+        } catch (error) {
+            debugLog('Error getting selected marks', error.message);
+            
+            // Display error
+            errorContainer.innerHTML = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${error.message}
+                </div>
+            `;
+            
+            // Reset selected marks container
+            selectedMarksContainer.innerHTML = '<p>Failed to load selected marks.</p>';
+        } finally {
+            // Hide loading indicator
+            loadingIndicator.style.display = 'none';
+            
+            // Re-enable button
+            getSelectedMarksBtn.disabled = false;
+            debugLog('Button re-enabled');
+        }
+    });
+    
+    // Initialize debug log
+    document.addEventListener('DOMContentLoaded', () => {
+        debugLog('Page loaded');
+        
+        // Check if buttons exist
+        debugLog('Get Selected Marks button exists', !!getSelectedMarksBtn);
+        debugLog('Debug button exists', !!debugBtn);
+        
+        // Try to set up Tableau viz
+        const vizId = vizIdElement.textContent.trim();
+        debugLog('Viz ID from page', vizId);
+        
+        // Check if zPortal exists
+        if (typeof zPortal === 'undefined') {
+            debugLog('zPortal is not defined');
+        } else {
+            debugLog('zPortal exists');
+        }
+    });
+</script>
