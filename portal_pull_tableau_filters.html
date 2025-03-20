@@ -1,0 +1,814 @@
+<style>
+  .wrapper {
+    overflow-y: scroll;
+}
+  #loading {
+      display: none;
+      margin: 20px 0;
+      color: #666;
+  }
+  
+  .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border-left-color: #09f;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+  }
+  
+  @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+  }
+  
+  #filter-container {
+      margin-top: 20px;
+  }
+  
+  .filter-section {
+      margin-bottom: 30px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      background-color: #f9f9f9;
+  }
+  
+  .filter-section h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      color: #333;
+  }
+  
+  .filter-item {
+      display: flex;
+      margin-bottom: 8px;
+      padding: 8px;
+      background-color: white;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .filter-name {
+      font-weight: bold;
+      width: 30%;
+      padding-right: 10px;
+  }
+  
+  .filter-value {
+      width: 50%;
+  }
+  
+  .filter-type {
+      width: 20%;
+      text-align: right;
+      color: #666;
+      font-style: italic;
+      font-size: 0.9em;
+  }
+  
+  .error-message {
+      color: #d9534f;
+      padding: 10px;
+      background-color: #f2dede;
+      border: 1px solid #ebccd1;
+      border-radius: 4px;
+      margin: 20px 0;
+  }
+  
+  .viz-info {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #e7f3fe;
+      border-left: 6px solid #2196F3;
+  }
+</style>
+
+<div>
+    
+    <div class="viz-info">
+        <p><strong>Viz ID:</strong> <span id="viz-id">content-1-0c8c0f55-dcfc-44bb-aea4-6b79b6f717e9</span></p>
+        <p><strong>Data Month:</strong> <span id="data-month">Loading...</span></p>
+    </div>
+    
+    <button id="fetch-filters-btn">Get Tableau Filters</button>
+    <button id="force-fetch-btn">Force Fetch Filters</button>
+    <button id="debug-viz-btn">Debug Viz Structure</button>
+    
+    <div id="loading">
+        <div class="spinner"></div> Loading filters...
+    </div>
+    
+    <div id="error-container"></div>
+    <div id="debug-output"></div>
+    
+    <div id="filter-container">
+        <div class="filter-section">
+            <h3>Global Filters</h3>
+            <div id="global-filters">
+                <p>Click the button above to fetch filters.</p>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <h3>Parameters</h3>
+            <div id="parameter-filters">
+                <p>Click the button above to fetch filters.</p>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <h3>Other Filters</h3>
+            <div id="other-filters">
+                <p>Click the button above to fetch filters.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        // Get DOM elements
+        const fetchFiltersBtn = document.getElementById('fetch-filters-btn');
+        const forceFetchBtn = document.getElementById('force-fetch-btn');
+        const debugVizBtn = document.getElementById('debug-viz-btn');
+        const loadingIndicator = document.getElementById('loading');
+        const errorContainer = document.getElementById('error-container');
+        const debugOutput = document.getElementById('debug-output');
+        const globalFiltersContainer = document.getElementById('global-filters');
+        const parameterFiltersContainer = document.getElementById('parameter-filters');
+        const otherFiltersContainer = document.getElementById('other-filters');
+        const dataMonthElement = document.getElementById('data-month');
+        const vizIdElement = document.getElementById('viz-id');
+        
+        // Store the viz object globally for reuse
+        let cachedViz = null;
+        
+        // Helper function to safely stringify objects for debugging
+        function safeStringify(obj, indent = 2) {
+            const cache = new Set();
+            return JSON.stringify(obj, (key, value) => {
+                if (typeof value === 'object' && value !== null) {
+                    if (cache.has(value)) {
+                        return '[Circular Reference]';
+                    }
+                    cache.add(value);
+                    
+                    // For functions, return their string representation
+                    if (typeof value === 'function') {
+                        return value.toString();
+                    }
+                }
+                return value;
+            }, indent);
+        }
+        
+        // Function to inspect an object and list its properties and methods
+        function inspectObject(obj, maxDepth = 1, currentDepth = 0) {
+            if (!obj || currentDepth > maxDepth) return {};
+            
+            const result = {};
+            
+            // Get all properties
+            for (const prop in obj) {
+                try {
+                    const value = obj[prop];
+                    
+                    if (typeof value === 'function') {
+                        result[prop] = 'function()';
+                    } else if (typeof value === 'object' && value !== null) {
+                        if (currentDepth < maxDepth) {
+                            result[prop] = inspectObject(value, maxDepth, currentDepth + 1);
+                        } else {
+                            result[prop] = '[Object]';
+                        }
+                    } else {
+                        result[prop] = value;
+                    }
+                } catch (e) {
+                    result[prop] = `[Error: ${e.message}]`;
+                }
+            }
+            
+            return result;
+        }
+        
+        // Check if a viz is ready by polling for properties
+        function checkVizReady(viz) {
+            // Check for common properties that indicate the viz is loaded
+            if (viz.workbook) return true;
+            
+            // Check for DOM readiness
+            const vizElement = viz.getParentElement && viz.getParentElement();
+            if (vizElement && vizElement.querySelector('iframe')) {
+                const iframe = vizElement.querySelector('iframe');
+                if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        // Get the viz object with polling mechanism
+        function getTableauViz(vizId, forceLoad = false) {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (typeof zPortal === 'undefined' || typeof zPortal.tableau === 'undefined') {
+                        reject(new Error('zPortal or zPortal.tableau is not defined. Cannot fetch Tableau data.'));
+                        return;
+                    }
+                    
+                    // Use cached viz if available
+                    if (cachedViz) {
+                        console.log('Using cached viz');
+                        resolve(cachedViz);
+                        return;
+                    }
+                    
+                    const viz = zPortal.tableau.getViz(vizId);
+                    console.log('Raw viz object:', viz);
+                    
+                    // If force loading, resolve immediately
+                    if (forceLoad) {
+                        console.log('Force loading viz');
+                        cachedViz = viz;
+                        resolve(viz);
+                        return;
+                    }
+                    
+                    // Check if viz is already ready
+                    if (checkVizReady(viz)) {
+                        console.log('Viz is already ready');
+                        cachedViz = viz;
+                        resolve(viz);
+                        return;
+                    }
+                    
+                    // Set up event listener for when viz is ready
+                    viz.addEventListener('firstinteractive', () => {
+                        console.log('Viz is interactive (event)');
+                        cachedViz = viz;
+                        resolve(viz);
+                    });
+                    
+                    // Set up polling as a backup
+                    let pollCount = 0;
+                    const maxPolls = 30; // 30 seconds max
+                    
+                    const pollInterval = setInterval(() => {
+                        pollCount++;
+                        console.log(`Polling viz (${pollCount}/${maxPolls})...`);
+                        
+                        if (checkVizReady(viz)) {
+                            console.log('Viz is ready (polling)');
+                            clearInterval(pollInterval);
+                            cachedViz = viz;
+                            resolve(viz);
+                            return;
+                        }
+                        
+                        if (pollCount >= maxPolls) {
+                            clearInterval(pollInterval);
+                            reject(new Error('Viz loading timed out. Try using the "Force Fetch" button.'));
+                        }
+                    }, 1000);
+                    
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+        
+        // Debug the viz structure
+        async function debugVizStructure(forceLoad = false) {
+            try {
+                const vizId = vizIdElement.textContent.trim();
+                const viz = await getTableauViz(vizId, forceLoad);
+                
+                // Inspect the viz object
+                const vizStructure = inspectObject(viz, 2);
+                
+                // Display the structure
+                debugOutput.textContent = JSON.stringify(vizStructure, null, 2);
+                
+                // Try to find workbook-related properties
+                console.log('Looking for workbook-related properties:');
+                for (const prop in viz) {
+                    if (prop.toLowerCase().includes('work') || 
+                        (typeof viz[prop] === 'object' && viz[prop] !== null)) {
+                        console.log(`Property: ${prop}`, viz[prop]);
+                    }
+                }
+                
+                return vizStructure;
+            } catch (error) {
+                console.error('Error debugging viz structure:', error);
+                debugOutput.textContent = `Error: ${error.message}`;
+                throw error;
+            }
+        }
+        
+        // Extract filters directly from DOM as a fallback
+        function extractFiltersFromDOM() {
+            try {
+                // Find the Tableau iframe
+                const tableauViz = document.querySelector('tableau-viz');
+                if (!tableauViz) return null;
+                
+                const iframe = tableauViz.querySelector('iframe');
+                if (!iframe) return null;
+                
+                // Try to access the iframe content
+                let iframeDoc;
+                try {
+                    iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                } catch (e) {
+                    console.error('Cannot access iframe content due to same-origin policy:', e);
+                    return null;
+                }
+                
+                // Look for filter elements
+                const filterElements = iframeDoc.querySelectorAll('.tabFilterBox, .tabFilterTitle');
+                if (!filterElements.length) return null;
+                
+                const filters = [];
+                filterElements.forEach(el => {
+                    // Extract filter name and value
+                    const filterName = el.querySelector('.tabFilterTitle')?.textContent.trim();
+                    const filterValue = el.querySelector('.tabFilterValue')?.textContent.trim();
+                    
+                    if (filterName && filterValue) {
+                        filters.push({
+                            name: filterName,
+                            value: filterValue,
+                            type: 'DOM Filter'
+                        });
+                    }
+                });
+                
+                return filters;
+            } catch (error) {
+                console.error('Error extracting filters from DOM:', error);
+                return null;
+            }
+        }
+        
+        // Fetch Tableau data with adaptive approach
+        async function fetchTableauData(vizId, forceLoad = false) {
+            try {
+                // Get the viz object
+                const viz = await getTableauViz(vizId, forceLoad);
+                console.log('Viz loaded successfully');
+                
+                // Debug the viz object to see its structure
+                console.log('Viz object:', viz);
+                
+                // Try different approaches to access workbook
+                let workbook = null;
+                let activeSheet = null;
+                
+                // Approach 1: Direct property
+                if (viz.workbook) {
+                    console.log('Found workbook via direct property');
+                    workbook = viz.workbook;
+                } 
+                // Approach 2: Method call if it exists
+                else if (typeof viz.getWorkbook === 'function') {
+                    console.log('Found workbook via getWorkbook method');
+                    workbook = viz.getWorkbook();
+                }
+                // Approach 3: Look for other properties
+                else {
+                    console.log('Searching for workbook in viz properties');
+                    for (const prop in viz) {
+                        if (typeof viz[prop] === 'object' && viz[prop] !== null) {
+                            if (viz[prop].name && 
+                                (typeof viz[prop].getParametersAsync === 'function' || 
+                                 viz[prop].activeSheet)) {
+                                console.log(`Found potential workbook in property: ${prop}`);
+                                workbook = viz[prop];
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // If we still don't have a workbook, try a fallback approach
+                if (!workbook && forceLoad) {
+                    console.log('Using fallback approach for workbook');
+                    
+                    // Create a minimal workbook structure
+                    workbook = {
+                        getParametersAsync: async () => [],
+                        activeSheet: {
+                            sheetType: 'unknown',
+                            worksheets: [],
+                            getWorksheets: () => []
+                        }
+                    };
+                    
+                    // Try to extract filters from DOM as a last resort
+                    const domFilters = extractFiltersFromDOM();
+                    if (domFilters) {
+                        console.log('Extracted filters from DOM:', domFilters);
+                    }
+                }
+                
+                if (!workbook) {
+                    throw new Error('Could not find workbook. Please try the "Force Fetch" button or check the console for debugging information.');
+                }
+                
+                console.log('Workbook:', workbook);
+                
+                // Try different approaches to access active sheet
+                if (workbook.activeSheet) {
+                    console.log('Found activeSheet via direct property');
+                    activeSheet = workbook.activeSheet;
+                } else if (typeof workbook.getActiveSheet === 'function') {
+                    console.log('Found activeSheet via getActiveSheet method');
+                    activeSheet = workbook.getActiveSheet();
+                } else {
+                    console.log('Searching for activeSheet in workbook properties');
+                    for (const prop in workbook) {
+                        if (typeof workbook[prop] === 'object' && workbook[prop] !== null) {
+                            if (workbook[prop].name && 
+                                (workbook[prop].sheetType || 
+                                 typeof workbook[prop].getFiltersAsync === 'function')) {
+                                console.log(`Found potential activeSheet in property: ${prop}`);
+                                activeSheet = workbook[prop];
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (!activeSheet && forceLoad) {
+                    console.log('Using fallback approach for active sheet');
+                    activeSheet = {
+                        sheetType: 'unknown',
+                        name: 'Unknown Sheet',
+                        worksheets: [],
+                        getWorksheets: () => []
+                    };
+                }
+                
+                if (!activeSheet) {
+                    throw new Error('Could not find active sheet. Please try the "Force Fetch" button or check the console for debugging information.');
+                }
+                
+                console.log('Active sheet:', activeSheet);
+                
+                // 1. Get Data Calendar Month
+                const now = new Date();
+                const dataCalendarMonth = now.toISOString().substring(0, 7) + '-01';
+                
+                // 2. Get parameters
+                let parameters = [];
+                let tableauViewId = null;
+                
+                try {
+                    if (typeof workbook.getParametersAsync === 'function') {
+                        parameters = await workbook.getParametersAsync();
+                        const viewIdParam = parameters.find(param => param.name === 'Tableau View ID');
+                        tableauViewId = viewIdParam ? viewIdParam.currentValue.value : null;
+                    }
+                } catch (paramError) {
+                    console.error('Error getting parameters:', paramError);
+                }
+                
+                // 3. Prepare filter containers
+                const uniqueFilters = {};
+                const filterSources = {};
+                const globalFilters = {};
+                const parameterFilters = {};
+                const otherFilters = {};
+                
+                // Process parameters
+                console.log("=== PARAMETERS ===");
+                for (const param of parameters) {
+                    if (param.name && param.currentValue && param.currentValue.value) {
+                        console.log(`Parameter: ${param.name}, Value: ${param.currentValue.value}`);
+                        
+                        const paramKey = `${param.name}:${param.currentValue.value}`;
+                        parameterFilters[paramKey] = {
+                            name: param.name,
+                            value: param.currentValue.value
+                        };
+                    }
+                }
+                
+                // Get worksheets
+                let worksheets = [];
+                const sheetType = activeSheet.sheetType || 
+                                 (typeof activeSheet.getSheetType === 'function' ? 
+                                  activeSheet.getSheetType() : null);
+                
+                if (sheetType === 'dashboard') {
+                    console.log('Active sheet is a dashboard');
+                    worksheets = activeSheet.worksheets || 
+                                (typeof activeSheet.getWorksheets === 'function' ? 
+                                 activeSheet.getWorksheets() : []);
+                } else {
+                    console.log('Active sheet is a worksheet');
+                    worksheets = [activeSheet];
+                }
+                
+                const worksheetCount = worksheets.length;
+                console.log(`Found ${worksheetCount} worksheets`);
+                
+                // Function to get filters from a worksheet
+                async function getAppliedFiltersFromWorksheet(worksheet) {
+                    try {
+                        const sheetName = worksheet.name || 
+                                         (typeof worksheet.getName === 'function' ? 
+                                          worksheet.getName() : 'Unknown');
+                        
+                        console.log(`Getting filters for worksheet: ${sheetName}`);
+                        
+                        // Check if getFiltersAsync method exists
+                        if (typeof worksheet.getFiltersAsync !== 'function') {
+                            console.error(`getFiltersAsync not available for worksheet ${sheetName}`);
+                            return;
+                        }
+                        
+                        const filters = await worksheet.getFiltersAsync();
+                        console.log(`Found ${filters.length} filters for ${sheetName}`);
+                        
+                        for (const filter of filters) {
+                            // Only process filters that have applied values and are not "All" selected
+                            if (filter.appliedValues && filter.appliedValues.length > 0 && !filter.isAllSelected) {
+                                // Extract the filter name
+                                const filterName = filter.fieldCaption || filter.fieldName;
+                                
+                                // Extract the applied values
+                                const appliedValues = filter.appliedValues.map(v => 
+                                    v.formattedValue || v.value
+                                ).join(', ');
+                                
+                                // Skip filters with values like "False", "True", "Null"
+                                const skipValues = ["false", "true", "null"];
+                                if (skipValues.includes(appliedValues.toLowerCase())) {
+                                    continue;
+                                }
+                                
+                                // Create a unique key for this filter name/value pair
+                                const filterKey = `${filterName}:${appliedValues}`;
+                                
+                                // Add to unique filters
+                                uniqueFilters[filterKey] = {
+                                    name: filterName,
+                                    value: appliedValues
+                                };
+                                
+                                // Track which worksheets this filter appears in
+                                if (!filterSources[filterKey]) {
+                                    filterSources[filterKey] = [];
+                                }
+                                if (!filterSources[filterKey].includes(sheetName)) {
+                                    filterSources[filterKey].push(sheetName);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error getting filters from worksheet:`, error);
+                    }
+                }
+                
+                // Process all worksheets
+                for (const worksheet of worksheets) {
+                    await getAppliedFiltersFromWorksheet(worksheet);
+                }
+                
+                // Try DOM extraction as a fallback
+                const domFilters = extractFiltersFromDOM();
+                if (domFilters && domFilters.length > 0 && Object.keys(uniqueFilters).length === 0) {
+                    console.log('Using DOM-extracted filters as fallback');
+                    domFilters.forEach(filter => {
+                        const filterKey = `${filter.name}:${filter.value}`;
+                        otherFilters[filterKey] = {
+                            name: filter.name,
+                            value: filter.value
+                        };
+                    });
+                }
+                
+                // Determine which filters are global
+                const globalThreshold = Math.max(1, Math.floor(worksheetCount * 0.75));
+                
+                Object.entries(filterSources).forEach(([key, sources]) => {
+                    if (sources.length >= globalThreshold) {
+                        globalFilters[key] = uniqueFilters[key];
+                    } else {
+                        otherFilters[key] = uniqueFilters[key];
+                    }
+                });
+                
+                // Create final arrays for display
+                const finalFilters = {
+                    global: [],
+                    parameters: [],
+                    other: []
+                };
+                
+                // Add global filters
+                Object.entries(globalFilters).forEach(([key, filter]) => {
+                    finalFilters.global.push({
+                        name: filter.name,
+                        value: filter.value,
+                        type: 'Global Filter'
+                    });
+                });
+                
+                // Add parameters
+                Object.entries(parameterFilters).forEach(([key, filter]) => {
+                    finalFilters.parameters.push({
+                        name: filter.name,
+                        value: filter.value,
+                        type: 'Parameter'
+                    });
+                });
+                
+                // Add other filters
+                Object.entries(otherFilters).forEach(([key, filter]) => {
+                    finalFilters.other.push({
+                        name: filter.name,
+                        value: filter.value,
+                        type: 'Local Filter'
+                    });
+                });
+                
+                // Log the final consolidated list of filters
+                console.log("=== FINAL FILTER LIST ===");
+                console.log("Global Filters:", finalFilters.global);
+                console.log("Parameters:", finalFilters.parameters);
+                console.log("Other Filters:", finalFilters.other);
+                
+                // Return the results
+                return {
+                    tableauViewId,
+                    dataCalendarMonth,
+                    finalFilters
+                };
+                
+            } catch (error) {
+                console.error('Error fetching Tableau data:', error);
+                throw error;
+            }
+        }
+        
+        // Display filters in HTML
+        function displayFilters(data) {
+            // Update data month
+            dataMonthElement.textContent = data.dataCalendarMonth || 'Not available';
+            
+            // Clear previous content
+            globalFiltersContainer.innerHTML = '';
+            parameterFiltersContainer.innerHTML = '';
+            otherFiltersContainer.innerHTML = '';
+            
+            // Display global filters
+            if (data.finalFilters.global.length === 0) {
+                globalFiltersContainer.innerHTML = '<p>No global filters applied.</p>';
+            } else {
+                data.finalFilters.global.forEach(filter => {
+                    const filterItem = document.createElement('div');
+                    filterItem.className = 'filter-item';
+                    filterItem.innerHTML = `
+                        <div class="filter-name">${filter.name}</div>
+                        <div class="filter-value">${filter.value}</div>
+                        <div class="filter-type">${filter.type}</div>
+                    `;
+                    globalFiltersContainer.appendChild(filterItem);
+                });
+            }
+            
+            // Display parameters
+            if (data.finalFilters.parameters.length === 0) {
+                parameterFiltersContainer.innerHTML = '<p>No parameters found.</p>';
+            } else {
+                data.finalFilters.parameters.forEach(filter => {
+                    const filterItem = document.createElement('div');
+                    filterItem.className = 'filter-item';
+                    filterItem.innerHTML = `
+                        <div class="filter-name">${filter.name}</div>
+                        <div class="filter-value">${filter.value}</div>
+                        <div class="filter-type">${filter.type}</div>
+                    `;
+                    parameterFiltersContainer.appendChild(filterItem);
+                });
+            }
+            
+            // Display other filters
+            if (data.finalFilters.other.length === 0) {
+                otherFiltersContainer.innerHTML = '<p>No other filters applied.</p>';
+            } else {
+                data.finalFilters.other.forEach(filter => {
+                    const filterItem = document.createElement('div');
+                    filterItem.className = 'filter-item';
+                    filterItem.innerHTML = `
+                        <div class="filter-name">${filter.name}</div>
+                        <div class="filter-value">${filter.value}</div>
+                        <div class="filter-type">${filter.type}</div>
+                    `;
+                    otherFiltersContainer.appendChild(filterItem);
+                });
+            }
+        }
+        
+        // Handle fetch filters button click
+        fetchFiltersBtn.addEventListener('click', async () => {
+            // Clear previous errors
+            errorContainer.innerHTML = '';
+            
+            // Show loading indicator
+            loadingIndicator.style.display = 'block';
+            
+            // Disable button while loading
+            fetchFiltersBtn.disabled = true;
+            
+            try {
+                // Get viz ID from the page
+                const vizId = vizIdElement.textContent.trim();
+                
+                // Fetch data
+                const data = await fetchTableauData(vizId, false);
+                
+                // Display filters
+                displayFilters(data);
+            } catch (error) {
+                // Display error
+                errorContainer.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+                
+                // Reset filter containers
+                globalFiltersContainer.innerHTML = '<p>Failed to load filters.</p>';
+                parameterFiltersContainer.innerHTML = '<p>Failed to load filters.</p>';
+                otherFiltersContainer.innerHTML = '<p>Failed to load filters.</p>';
+            } finally {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+                
+                // Re-enable button
+                fetchFiltersBtn.disabled = false;
+            }
+        });
+        
+        // Handle force fetch button click
+        forceFetchBtn.addEventListener('click', async () => {
+            // Clear previous errors
+            errorContainer.innerHTML = '';
+            
+            // Show loading indicator
+            loadingIndicator.style.display = 'block';
+            
+            // Disable button while loading
+            forceFetchBtn.disabled = true;
+            
+            try {
+                // Get viz ID from the page
+                const vizId = vizIdElement.textContent.trim();
+                
+                // Fetch data with force load
+                const data = await fetchTableauData(vizId, true);
+                
+                // Display filters
+                displayFilters(data);
+            } catch (error) {
+                // Display error
+                errorContainer.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+                
+                // Reset filter containers
+                globalFiltersContainer.innerHTML = '<p>Failed to load filters.</p>';
+                parameterFiltersContainer.innerHTML = '<p>Failed to load filters.</p>';
+                otherFiltersContainer.innerHTML = '<p>Failed to load filters.</p>';
+            } finally {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+                
+                // Re-enable button
+                forceFetchBtn.disabled = false;
+            }
+        });
+        
+        // Handle debug button click
+        debugVizBtn.addEventListener('click', async () => {
+            debugOutput.textContent = 'Debugging viz structure...';
+            
+            try {
+                await debugVizStructure(true);
+            } catch (error) {
+                debugOutput.textContent = `Error debugging viz: ${error.message}`;
+            }
+        });
+    </script>
