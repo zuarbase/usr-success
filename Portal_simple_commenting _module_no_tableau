@@ -1,0 +1,1234 @@
+<style>
+/* Sidebar container */
+#combined-sidebar {
+    position: fixed;
+    top: 20px;
+    right: -370px; /* Increased to account for margin */
+    width: 350px;
+    height: calc(100% - 40px); /* Reduced height to account for margins */
+    background-color: #fff;
+    box-shadow: -2px 0 15px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    margin: 0 20px 20px 0; /* Add margin on right and bottom */
+}
+
+#combined-sidebar.open {
+    right: 20px; /* Stop 20px from edge */
+}
+
+/* Sidebar header */
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    border-radius: 8px 8px 0 0;
+}
+
+.sidebar-title {
+    margin: 0;
+    font-size: 18px;
+}
+
+#close-sidebar-icon {
+    cursor: pointer;
+    font-size: 20px;
+    background: none;
+    border: none;
+    color: #555;
+}
+
+/* Sidebar content */
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: none;
+}
+
+/* Comments grid */
+#comments-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.comment-box {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.comment-header {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.level-informational {
+    background-color: #e3f2fd;
+}
+
+.level-warning {
+    background-color: #fff3e0;
+}
+
+.comment-title-display {
+    font-weight: bold;
+}
+
+.comment-date-display {
+    font-size: 12px;
+    color: #666;
+}
+
+.comment-body {
+    padding: 10px;
+    background-color: #fff;
+}
+
+.comment-message {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.comment-footer {
+    padding: 10px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #666;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* Replace img with i for Font Awesome */
+.action-btn i {
+    font-size: 16px;
+}
+
+.edit-comment-btn i {
+    color: #2196f3;
+}
+
+.delete-comment-btn i {
+    color: #f44336;
+}
+
+/* Add comment button */
+.add-comment-container {
+    padding: 15px;
+    border-top: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+    background-color: #f9f9f9;
+}
+
+#add-comment-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+#add-comment-btn:hover {
+    background-color: #45a049;
+}
+
+#add-comment-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#button-spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s linear infinite;
+    margin-right: 5px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Sidebar icons */
+.sidebar-icons {
+    position: fixed;
+    top: 50%;
+    right: 20px; /* Moved in from edge */
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 999;
+}
+
+.sidebar-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* Replace img with i for Font Awesome */
+.sidebar-icon i {
+    font-size: 20px;
+    color: #555;
+    transition: color 0.3s;
+}
+
+.sidebar-icon:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-icon.active {
+    background-color: #e3f2fd;
+}
+
+.sidebar-icon.active i {
+    color: #2196f3;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #555;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: #2196f3;
+    outline: none;
+}
+
+.level-options {
+    display: flex;
+    gap: 20px;
+}
+
+.level-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-footer {
+    padding: 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.btn-secondary {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+.btn-link {
+    background: none;
+    color: #2196f3;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.btn-link:hover {
+    color: #0d8aee;
+}
+
+/* Loading indicator */
+.loading-indicator {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+/* Help content */
+.help-section {
+    line-height: 1.6;
+}
+
+.help-section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.help-section h4 {
+    margin-bottom: 8px;
+    color: #444;
+}
+
+.help-section ul {
+    padding-left: 20px;
+}
+
+.help-section li {
+    margin-bottom: 5px;
+}
+</style>
+<div>
+    <!-- Sidebar icons -->
+    <div class="sidebar-icons">
+        <div id="comment-icon" class="sidebar-icon" title="Comments">
+            <i class="fas fa-comments"></i>
+        </div>
+        <div id="help-icon" class="sidebar-icon" title="Help">
+            <i class="fas fa-question-circle"></i>
+        </div>
+    </div>
+    
+    <!-- Combined sidebar -->
+    <div id="combined-sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">Comments</h2>
+            <button id="close-sidebar-icon"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <!-- Comments content -->
+        <div id="comment-content" class="sidebar-content">
+            <div id="comments-grid">
+                <!-- Comments will be loaded here -->
+                <div class="loading-indicator">Loading comments...</div>
+            </div>
+        </div>
+        
+        <!-- Help content -->
+        <div id="help-content" class="sidebar-content">
+            <!-- Help content will be loaded here -->
+        </div>
+        
+        <!-- Add comment button -->
+        <div class="add-comment-container">
+            <button id="add-comment-btn">
+                <div id="button-spinner"></div>
+                <span id="button-text">Add Comment</span>
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    (function() {
+    'use strict';
+
+    // ==========================================================================
+    // ==                           CONFIGURATION                              ==
+    // ==========================================================================
+    
+    // API endpoint for database operations
+    const API_ENDPOINT = 'https://your-api-endpoint.com/api/comments';
+    
+    // Icon paths - replace with your own
+    const INFO_ICON_PATH = '/assets/info-icon.png';
+    const EDIT_ICON_PATH = '/assets/edit-icon.png';
+    const DELETE_ICON_PATH = '/assets/delete-icon.png';
+    
+    // ==========================================================================
+    // ==                         DOM ELEMENT REFERENCES                       ==
+    // ==========================================================================
+    
+    // Main sidebar elements
+    const sidebar = document.getElementById('combined-sidebar');
+    const commentIcon = document.getElementById('comment-icon');
+    const helpIcon = document.getElementById('help-icon');
+    const closeSidebarIcon = document.getElementById('close-sidebar-icon');
+    
+    // Content sections
+    const commentContent = document.getElementById('comment-content');
+    const helpContent = document.getElementById('help-content');
+    const commentsGrid = document.getElementById('comments-grid');
+    
+    // Comment action elements
+    const addCommentBtn = document.getElementById('add-comment-btn');
+    const addCommentBtnText = document.getElementById('button-text');
+    const addCommentBtnSpinner = document.getElementById('button-spinner');
+    
+    // Validate critical elements
+    const criticalElementsExist = sidebar && commentIcon && closeSidebarIcon && 
+                                 commentContent && commentsGrid && addCommentBtn;
+    if (!criticalElementsExist) {
+      console.error('Critical sidebar element(s) missing. Initialization aborted.');
+      return;
+    }
+    
+    // ==========================================================================
+    // ==                            STATE VARIABLES                           ==
+    // ==========================================================================
+    
+    let commentDataCache = null;
+    let cachedCommentObjects = null;
+    let showingAllComments = false;
+    let userCanEditComments = true;
+    let activeSidebarIcon = null;
+    
+    // ==========================================================================
+    // ==                         UTILITY FUNCTIONS                            ==
+    // ==========================================================================
+    
+    // Format date to "Month YYYY"
+    function formatDate(dateInput) {
+      if (!dateInput) return 'N/A';
+      try {
+        const date = new Date(dateInput);
+        if (isNaN(date.getTime())) return 'N/A';
+        const monthNames = ["January", "February", "March", "April", "May", "June", 
+                           "July", "August", "September", "October", "November", "December"];
+        return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+      } catch (e) {
+        console.error('Error formatting date:', e);
+        return 'N/A';
+      }
+    }
+    
+    // Format timestamp to user-friendly string
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      const options = {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true
+      };
+      return date.toLocaleString('en-US', options);
+    }
+    
+    // Generate UUID for new comments
+    function generateCommentId() {
+      if (window.crypto && window.crypto.randomUUID) {
+        return window.crypto.randomUUID();
+      } else {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      }
+    }
+    
+    // Get current timestamp in ISO format
+    function getFormattedTimestamp() {
+      return new Date().toISOString();
+    }
+    
+    // Toggle loading state for buttons
+    function setLoadingState(buttonElement, textElement, spinnerElement, isLoading) {
+      if (!buttonElement || !textElement || !spinnerElement) return;
+      buttonElement.disabled = isLoading;
+      textElement.style.display = isLoading ? 'none' : 'inline';
+      spinnerElement.style.display = isLoading ? 'inline-block' : 'none';
+    }
+    
+    // ==========================================================================
+    // ==                         DATA FETCHING                                ==
+    // ==========================================================================
+    
+    // Fetch comments from API
+    async function fetchComments() {
+      try {
+        const response = await fetch(API_ENDPOINT);
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+        throw error;
+      }
+    }
+    
+    // ==========================================================================
+    // ==                         COMMENTS MODULE                              ==
+    // ==========================================================================
+    
+    // Render comments in the grid
+    function renderComments(comments) {
+      if (!commentsGrid) return;
+      commentsGrid.innerHTML = '';
+      
+      if (!comments || comments.length === 0) {
+        commentsGrid.innerHTML = '<p>No comments available.</p>';
+        return;
+      }
+      
+      // Cache raw comment objects
+      cachedCommentObjects = comments;
+      
+      // Filter active comments and sort
+      const sortedComments = [...comments]
+        .filter(comment => comment.state !== 'removed')
+        .sort((a, b) => {
+          // Sort by priority first
+          if (a.priority !== b.priority) return b.priority - a.priority;
+          // Then by date (newest first)
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        });
+      
+      // Determine which comments to show
+      let commentsToRender;
+      let olderCommentsCount = 0;
+      
+      if (showingAllComments) {
+        commentsToRender = sortedComments;
+      } else {
+        // Show only the first 5 comments by default
+        commentsToRender = sortedComments.slice(0, 5);
+        olderCommentsCount = sortedComments.length - commentsToRender.length;
+      }
+      
+      // Render each comment
+      commentsToRender.forEach(comment => {
+        const commentBox = document.createElement('div');
+        commentBox.className = 'comment-box';
+        commentBox.dataset.commentId = comment.id;
+        
+        // Create comment header
+        const header = document.createElement('div');
+        header.className = `comment-header level-${comment.level || 'informational'}`;
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'comment-title-display';
+        titleSpan.textContent = comment.title || 'No Title';
+        
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'comment-date-display';
+        dateSpan.textContent = formatDate(comment.date);
+        
+        header.appendChild(titleSpan);
+        header.appendChild(dateSpan);
+        
+        // Create comment body
+        const body = document.createElement('div');
+        body.className = 'comment-body';
+        const messagePara = document.createElement('p');
+        messagePara.className = 'comment-message';
+        messagePara.textContent = comment.message || '';
+        body.appendChild(messagePara);
+        
+        // Create comment footer
+        const footer = document.createElement('div');
+        footer.className = 'comment-footer';
+        const authorSpan = document.createElement('span');
+        authorSpan.className = 'comment-author';
+        authorSpan.textContent = `By: ${comment.author || 'Unknown'} on ${formatTimestamp(comment.timestamp) || ''}`;
+        footer.appendChild(authorSpan);
+        
+        // Add edit/delete buttons if user has permission
+        if (userCanEditComments) {
+          const actionsDiv = document.createElement('div');
+          actionsDiv.className = 'comment-actions';
+          
+          // Edit button
+          const editBtn = document.createElement('button');
+          editBtn.className = 'edit-comment-btn action-btn';
+          editBtn.dataset.commentId = comment.id;
+          editBtn.title = "Edit comment";
+          const editImg = document.createElement('img');
+          editImg.src = EDIT_ICON_PATH;
+          editImg.alt = "Edit";
+          editBtn.appendChild(editImg);
+          
+          // Delete button
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-comment-btn action-btn';
+          deleteBtn.dataset.commentId = comment.id;
+          deleteBtn.title = "Delete comment";
+          const deleteImg = document.createElement('img');
+          deleteImg.src = DELETE_ICON_PATH;
+          deleteImg.alt = "Delete";
+          deleteBtn.appendChild(deleteImg);
+          
+          actionsDiv.appendChild(editBtn);
+          actionsDiv.appendChild(deleteBtn);
+          footer.appendChild(actionsDiv);
+        }
+        
+        // Assemble the comment box
+        commentBox.appendChild(header);
+        commentBox.appendChild(body);
+        commentBox.appendChild(footer);
+        commentsGrid.appendChild(commentBox);
+      });
+      
+      // Add "View More" button if there are older comments
+      if (olderCommentsCount > 0 && !showingAllComments) {
+        const viewMoreButton = document.createElement('button');
+        viewMoreButton.className = 'view-more-btn btn btn-link';
+        viewMoreButton.textContent = `View ${olderCommentsCount} Older Comment(s)`;
+        viewMoreButton.style.marginTop = '10px';
+        viewMoreButton.addEventListener('click', () => {
+          showingAllComments = true;
+          renderComments(cachedCommentObjects);
+        });
+        commentsGrid.appendChild(viewMoreButton);
+      }
+    }
+    
+    // Show modal for adding/editing comments
+    function showCommentModal(options = {}) {
+      const { mode = 'add', commentData = {} } = options;
+      const isEdit = mode === 'edit';
+      
+      return new Promise((resolve, reject) => {
+        // Create modal container
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'modal-overlay';
+        
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content';
+        
+        // Create modal header
+        const modalHeader = document.createElement('div');
+        modalHeader.className = 'modal-header';
+        
+        const modalTitle = document.createElement('h3');
+        modalTitle.textContent = isEdit ? 'Edit Comment' : 'Add Comment';
+        
+        const closeButton = document.createElement('button');
+        closeButton.className = 'modal-close-btn';
+        closeButton.innerHTML = '&times;';
+        closeButton.addEventListener('click', () => {
+          document.body.removeChild(modalOverlay);
+          reject(new Error('Modal dismissed by user'));
+        });
+        
+        modalHeader.appendChild(modalTitle);
+        modalHeader.appendChild(closeButton);
+        
+        // Create modal body
+        const modalBody = document.createElement('div');
+        modalBody.className = 'modal-body';
+        
+        // Title field
+        const titleGroup = document.createElement('div');
+        titleGroup.className = 'form-group';
+        
+        const titleLabel = document.createElement('label');
+        titleLabel.setAttribute('for', 'modal-comment-title');
+        titleLabel.textContent = 'Title:';
+        
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.id = 'modal-comment-title';
+        titleInput.className = 'form-control';
+        titleInput.value = isEdit ? commentData.title || '' : '';
+        titleInput.required = true;
+        
+        titleGroup.appendChild(titleLabel);
+        titleGroup.appendChild(titleInput);
+        
+        // Message field
+        const messageGroup = document.createElement('div');
+        messageGroup.className = 'form-group';
+        
+        const messageLabel = document.createElement('label');
+        messageLabel.setAttribute('for', 'modal-comment-message');
+        messageLabel.textContent = 'Comment:';
+        
+        const messageInput = document.createElement('textarea');
+        messageInput.id = 'modal-comment-message';
+        messageInput.className = 'form-control';
+        messageInput.rows = 4;
+        messageInput.value = isEdit ? commentData.message || '' : '';
+        messageInput.required = true;
+        
+        messageGroup.appendChild(messageLabel);
+        messageGroup.appendChild(messageInput);
+        
+        // Level field
+        const levelGroup = document.createElement('div');
+        levelGroup.className = 'form-group';
+        
+        const levelLabel = document.createElement('label');
+        levelLabel.textContent = 'Level:';
+        
+        const levelOptions = document.createElement('div');
+        levelOptions.className = 'level-options';
+        
+        // Info level option
+        const infoOption = document.createElement('div');
+        infoOption.className = 'level-option';
+        
+        const infoInput = document.createElement('input');
+        infoInput.type = 'radio';
+        infoInput.id = 'modal-comment-level-info';
+        infoInput.name = 'modal-comment-level';
+        infoInput.value = 'informational';
+        infoInput.checked = !isEdit || commentData.level === 'informational';
+        
+        const infoLabel = document.createElement('label');
+        infoLabel.setAttribute('for', 'modal-comment-level-info');
+        infoLabel.textContent = 'Informational';
+        
+        infoOption.appendChild(infoInput);
+        infoOption.appendChild(infoLabel);
+        
+        // Warning level option
+        const warnOption = document.createElement('div');
+        warnOption.className = 'level-option';
+        
+        const warnInput = document.createElement('input');
+        warnInput.type = 'radio';
+        warnInput.id = 'modal-comment-level-warn';
+        warnInput.name = 'modal-comment-level';
+        warnInput.value = 'warning';
+        warnInput.checked = isEdit && commentData.level === 'warning';
+        
+        const warnLabel = document.createElement('label');
+        warnLabel.setAttribute('for', 'modal-comment-level-warn');
+        warnLabel.textContent = 'Warning';
+        
+        warnOption.appendChild(warnInput);
+        warnOption.appendChild(warnLabel);
+        
+        levelOptions.appendChild(infoOption);
+        levelOptions.appendChild(warnOption);
+        
+        levelGroup.appendChild(levelLabel);
+        levelGroup.appendChild(levelOptions);
+        
+        // Add fields to modal body
+        modalBody.appendChild(titleGroup);
+        modalBody.appendChild(messageGroup);
+        modalBody.appendChild(levelGroup);
+        
+        // Create modal footer
+        const modalFooter = document.createElement('div');
+        modalFooter.className = 'modal-footer';
+        
+        const cancelButton = document.createElement('button');
+        cancelButton.className = 'btn btn-secondary';
+        cancelButton.textContent = 'Cancel';
+        cancelButton.addEventListener('click', () => {
+          document.body.removeChild(modalOverlay);
+          reject(new Error('Modal dismissed by user'));
+        });
+        
+        const confirmButton = document.createElement('button');
+        confirmButton.className = 'btn btn-primary';
+        confirmButton.textContent = isEdit ? 'Save Changes' : 'Add Comment';
+        confirmButton.addEventListener('click', () => {
+          // Validate inputs
+          if (!titleInput.value.trim() || !messageInput.value.trim()) {
+            alert('Title and Message are required.');
+            return;
+          }
+          
+          // Get selected level
+          const levelValue = document.querySelector('input[name="modal-comment-level"]:checked').value;
+          
+          // Prepare result
+          const result = {
+            id: isEdit ? commentData.id : generateCommentId(),
+            title: titleInput.value.trim(),
+            message: messageInput.value.trim(),
+            level: levelValue,
+            date: new Date().toISOString().split('T')[0],
+            author: getCurrentUser().name,
+            timestamp: getFormattedTimestamp()
+          };
+          
+          document.body.removeChild(modalOverlay);
+          resolve(result);
+        });
+        
+        modalFooter.appendChild(cancelButton);
+        modalFooter.appendChild(confirmButton);
+        
+        // Assemble modal
+        modalContent.appendChild(modalHeader);
+        modalContent.appendChild(modalBody);
+        modalContent.appendChild(modalFooter);
+        modalOverlay.appendChild(modalContent);
+        
+        // Add to document
+        document.body.appendChild(modalOverlay);
+        
+        // Focus on title input
+        titleInput.focus();
+      });
+    }
+    
+    // Submit comment to API
+    async function submitComment(commentDetails) {
+      const isEdit = !!commentDetails.id;
+      const method = isEdit ? 'PUT' : 'POST';
+      const url = isEdit ? `${API_ENDPOINT}/${commentDetails.id}` : API_ENDPOINT;
+      
+      // Set loading state
+      setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, true);
+      
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(commentDetails)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        
+        alert(`Comment ${isEdit ? 'updated' : 'added'} successfully!`);
+        
+        // Refresh comments
+        await loadCommentData(true);
+        
+      } catch (error) {
+        console.error(`Error ${isEdit ? 'updating' : 'adding'} comment:`, error);
+        alert(`Error submitting comment: ${error.message}`);
+      } finally {
+        // Reset loading state
+        setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, false);
+      }
+    }
+    
+    // Delete comment
+    async function deleteComment(commentId) {
+      if (!commentId) {
+        alert("Error: Cannot delete comment without an ID.");
+        return;
+      }
+      
+      // Confirm deletion
+      if (!confirm("Are you sure you want to delete this comment? This action cannot be undone.")) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_ENDPOINT}/${commentId}`, {
+          method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        
+        alert("Comment deleted successfully!");
+        
+        // Refresh comments
+        await loadCommentData(true);
+        
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+        alert(`Error deleting comment: ${error.message}`);
+      }
+    }
+    
+    // Load comment data
+    async function loadCommentData(forceRefresh = false) {
+      // Use cached data if available and not forcing refresh
+      if (!forceRefresh && commentDataCache) {
+        renderComments(commentDataCache);
+        return commentDataCache;
+      }
+      
+      // Set loading state
+      if (commentsGrid) {
+        commentsGrid.innerHTML = '<div class="loading-indicator">Loading comments...</div>';
+      }
+      
+      try {
+        const comments = await fetchComments();
+        
+        // Cache the result
+        commentDataCache = comments;
+        
+        // Render the comments
+        renderComments(comments);
+        return comments;
+        
+      } catch (error) {
+        console.error('Error loading comment data:', error);
+        if (commentsGrid) {
+          commentsGrid.innerHTML = `<p class="text-danger">Error loading comments: ${error.message}</p>`;
+        }
+        throw error;
+      }
+    }
+    
+    // ==========================================================================
+    // ==                         HELP CONTENT MODULE                          ==
+    // ==========================================================================
+    
+    // Load help content
+    function loadHelpContent() {
+      if (!helpContent) return;
+      
+      helpContent.innerHTML = `
+        <div class="help-section">
+          <h3>Using the Comments Sidebar</h3>
+          <p>This sidebar allows you to add, view, edit, and delete comments.</p>
+          
+          <h4>Features</h4>
+          <ul>
+            <li><strong>Adding Comments:</strong> Click "Add Comment" to create a new comment.</li>
+            <li><strong>Viewing Comments:</strong> Comments are displayed with the most recent and important ones first.</li>
+            <li><strong>Editing/Deleting:</strong> Use the pencil and trash icons to modify your comments.</li>
+            <li><strong>Comment Levels:</strong> Choose between "Informational" (general notes) or "Warning" (requires attention).</li>
+          </ul>
+        </div>
+      `;
+    }
+    
+    // ==========================================================================
+    // ==                         SIDEBAR UI MANAGEMENT                        ==
+    // ==========================================================================
+    
+    // Show specific content section
+    function showContent(contentId, iconElement) {
+      // Hide all content sections
+      const contentSections = document.querySelectorAll('.sidebar-content');
+      contentSections.forEach(section => {
+        section.style.display = 'none';
+      });
+      
+      // Show selected content
+      const selectedContent = document.getElementById(contentId);
+      if (selectedContent) {
+        selectedContent.style.display = 'block';
+      }
+      
+      // Update active state of icons
+      const icons = document.querySelectorAll('.sidebar-icon');
+      icons.forEach(icon => {
+        icon.classList.remove('active');
+      });
+      
+      // Set clicked icon as active
+      if (iconElement) {
+        iconElement.classList.add('active');
+        activeSidebarIcon = iconElement;
+      }
+      
+      // Show sidebar
+      if (sidebar) {
+        sidebar.classList.add('open');
+      }
+    }
+    
+    // Close sidebar
+    function closeSidebar() {
+      if (sidebar) {
+        sidebar.classList.remove('open');
+      }
+      
+      // Remove active state from icons
+      const icons = document.querySelectorAll('.sidebar-icon');
+      icons.forEach(icon => {
+        icon.classList.remove('active');
+      });
+      
+      activeSidebarIcon = null;
+    }
+    
+    // Toggle sidebar
+    function toggleSidebar(contentId, iconElement) {
+      if (!sidebar) return;
+      
+      const isOpen = sidebar.classList.contains('open');
+      
+      if (isOpen) {
+        // If sidebar is open and clicked icon is already active, close it
+        if (activeSidebarIcon === iconElement) {
+          closeSidebar();
+        } 
+        // Otherwise, switch to new content
+        else if (contentId && iconElement) {
+          showContent(contentId, iconElement);
+        }
+      } else {
+        // If sidebar is closed, open it with specified content
+        if (contentId && iconElement) {
+          showContent(contentId, iconElement);
+        }
+      }
+    }
+    
+    // ==========================================================================
+    // ==                         EVENT LISTENERS                              ==
+    // ==========================================================================
+    
+    // Set up event listeners
+    function setupEventListeners() {
+      // Comment icon click
+      if (commentIcon) {
+        commentIcon.addEventListener('click', async (event) => {
+          if (event.preventDefault) event.preventDefault();
+          
+          toggleSidebar('comment-content', commentIcon);
+          
+          if (sidebar?.classList.contains('open')) {
+            try {
+              await loadCommentData();
+            } catch (error) {
+              console.error('Error loading comment data:', error);
+            }
+          }
+        });
+      }
+      
+      // Help icon click
+      if (helpIcon) {
+        helpIcon.addEventListener('click', (event) => {
+          if (event.preventDefault) event.preventDefault();
+          
+          toggleSidebar('help-content', helpIcon);
+          
+          if (sidebar?.classList.contains('open')) {
+            loadHelpContent();
+          }
+        });
+      }
+      
+      // Close sidebar icon click
+      if (closeSidebarIcon) {
+        closeSidebarIcon.addEventListener('click', (event) => {
+          if (event.preventDefault) event.preventDefault();
+          closeSidebar();
+        });
+      }
+      
+      // Add comment button click
+      if (addCommentBtn) {
+        addCommentBtn.addEventListener('click', async () => {
+          setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, true);
+          
+          try {
+            const commentDetails = await showCommentModal({ mode: 'add' });
+            await submitComment(commentDetails);
+          } catch (error) {
+            if (error?.message !== 'Modal dismissed by user') {
+              console.error('Error adding comment:', error);
+              alert(`Error adding comment: ${error.message}`);
+            }
+          } finally {
+            setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, false);
+          }
+        });
+      }
+      
+      // Comment grid event delegation (edit/delete buttons)
+      if (commentsGrid) {
+        commentsGrid.addEventListener('click', async (event) => {
+          // Edit button click
+          if (event.target.closest('.edit-comment-btn')) {
+            const button = event.target.closest('.edit-comment-btn');
+            const commentId = button.dataset.commentId;
+            
+            try {
+              // Find comment data
+              const commentData = cachedCommentObjects?.find(comment => comment.id === commentId);
+              if (!commentData) {
+                alert("Error: Comment data not found.");
+                return;
+              }
+              
+              // Show edit modal
+              const updatedDetails = await showCommentModal({
+                mode: 'edit',
+                commentData: commentData
+              });
+              
+              // Submit updated comment
+              await submitComment(updatedDetails);
+              
+            } catch (error) {
+              if (error?.message !== 'Modal dismissed by user') {
+                console.error('Error editing comment:', error);
+                alert(`Error editing comment: ${error.message}`);
+              }
+            }
+          }
+          
+          // Delete button click
+          if (event.target.closest('.delete-comment-btn')) {
+            const button = event.target.closest('.delete-comment-btn');
+            const commentId = button.dataset.commentId;
+            
+            try {
+              await deleteComment(commentId);
+            } catch (error) {
+              console.error('Error deleting comment:', error);
+              alert(`Error deleting comment: ${error.message}`);
+            }
+          }
+          
+          // View more button click
+          if (event.target.closest('.view-more-btn')) {
+            showingAllComments = true;
+            renderComments(cachedCommentObjects);
+          }
+        });
+      }
+      
+      // Keyboard events
+      document.addEventListener('keydown', (event) => {
+        // Close sidebar on Escape key
+        if (event.key === 'Escape' && sidebar?.classList.contains('open')) {
+          closeSidebar();
+        }
+      });
+    }
+    
+    // ==========================================================================
+    // ==                         USER MANAGEMENT                              ==
+    // ==========================================================================
+    
+    // Get current user information
+    function getCurrentUser() {
+      // Replace with your user management system
+      return {
+        name: 'Current User',
+        email: 'user@example.com',
+        canEdit: true
+      };
+    }
+    
+    // ==========================================================================
+    // ==                         INITIALIZATION                               ==
+    // ==========================================================================
+    
+    // Initialize sidebar
+    function initializeSidebar() {
+      // Check user permissions
+      const currentUser = getCurrentUser();
+      userCanEditComments = currentUser.canEdit;
+      
+      // Set up event listeners
+      setupEventListeners();
+      
+      console.log('Sidebar initialized successfully.');
+    }
+    
+    // Start initialization
+    initializeSidebar();
+    
+})();
+    
+</script>
