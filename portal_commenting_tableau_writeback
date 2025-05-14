@@ -1,0 +1,3117 @@
+<style>
+
+/* ==========================================================================
+   Sidebar Container Styles
+   ========================================================================== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 36px; /* Start with zero width instead of off-screen */
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    transition: width 0.3s ease;
+    z-index: 1000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden; /* Hide content when width is 0 */
+}
+
+.sidebar.open {
+    width: 400px; /* Expand to full width when open */
+}
+/* ==========================================================================
+   Sidebar Icons Section
+   ========================================================================== */
+.sidebar-icons {
+    width: 50px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 15px;
+}
+
+.sidebar-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    cursor: pointer;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.sidebar-icon:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.sidebar-icon.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.sidebar-icon i {
+    font-size: 18px;
+}
+
+.close-icon {
+    margin-top: auto;
+    margin-bottom: 15px;
+}
+
+/* ==========================================================================
+   Sidebar Content Container
+   ========================================================================== */
+.sidebar-content-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.sidebar-content {
+    display: none; /* Hidden by default */
+}
+
+.sidebar-content h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #343a40;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+/* ==========================================================================
+   Comments Section
+   ========================================================================== */
+.comments-grid {
+    margin-bottom: 15px;
+}
+
+.comment-box {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 5px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.comment-header.level-informational {
+    border-left: 4px solid #17a2b8;
+    padding-left: 8px;
+}
+
+.comment-header.level-warning {
+    border-left: 4px solid #ffc107;
+    padding-left: 8px;
+}
+
+.comment-title-display {
+    font-weight: 600;
+    color: #343a40;
+    font-size: 1rem;
+    grid-area: 1/1;
+}
+
+.comment-month-display {
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-align: right;
+    grid-area: 1/2;
+}
+
+.comment-complex-display {
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-align: right;
+    grid-area: 2/2;
+}
+
+.comment-body {
+    margin-bottom: 10px;
+}
+
+.comment-message {
+    margin: 0;
+    color: #495057;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.comment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.comment-author {
+    font-style: italic;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+    background-color: #e9ecef;
+}
+
+.action-btn img {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+
+.add-comment-btn {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.view-more-btn {
+    width: 100%;
+    text-align: center;
+    color: #007bff;
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.view-more-btn:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   Help Section
+   ========================================================================== */
+.help-section {
+    color: #495057;
+    line-height: 1.6;
+}
+
+.help-section h3 {
+    color: #343a40;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.help-section h4 {
+    color: #495057;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.help-section p {
+    margin-bottom: 15px;
+}
+
+.help-section ul {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.help-section li {
+    margin-bottom: 5px;
+}
+
+/* ==========================================================================
+   Modal Styles (for Comment Add/Edit)
+   ========================================================================== */
+.info-tooltip-container {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+.info-icon {
+    width: 14px;
+    height: 14px;
+    cursor: help;
+    vertical-align: middle;
+    opacity: 0.7;
+}
+
+.info-tooltip-text {
+    visibility: hidden;
+    width: 220px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 5px;
+    padding: 8px 10px;
+    position: absolute;
+    z-index: 10;
+    bottom: 130%;
+    left: 50%;
+    margin-left: -110px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    font-size: 0.9em;
+    font-weight: normal;
+    line-height: 1.4;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.info-tooltip-container:hover .info-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* ==========================================================================
+   Loading Indicators
+   ========================================================================== */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.spinner-border {
+    margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   Responsive Adjustments
+   ========================================================================== */
+@media (max-width: 576px) {
+    .sidebar {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .comment-header {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+    }
+    
+    .comment-month-display,
+    .comment-complex-display {
+        text-align: left;
+        grid-column: 1;
+    }
+    
+    .comment-month-display {
+        grid-row: 2;
+    }
+    
+    .comment-complex-display {
+        grid-row: 3;
+    }
+}
+</style>
+<div id="combined-sidebar" class="sidebar">
+    <!-- Sidebar Icons -->
+    <div class="sidebar-icons">
+        <div id="comment-icon" class="sidebar-icon" title="Comments">
+            <i class="fas fa-comment"></i>
+        </div>
+        <div id="help-icon" class="sidebar-icon" title="Help">
+            <i class="fas fa-question-circle"></i>
+        </div>
+        <div id="close-sidebar-icon" class="sidebar-icon close-icon" title="Close Sidebar">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+
+    <!-- Sidebar Content -->
+    <div class="sidebar-content-container">
+        <!-- Comments Content -->
+        <div id="comment-content" class="sidebar-content">
+            <h3>Comments</h3>
+            <div id="comments-grid" class="comments-grid">
+                <!-- Comments will be loaded here -->
+                <p>Loading comments...</p>
+            </div>
+            <button id="add-comment-btn" class="btn btn-primary add-comment-btn">
+                <span id="button-text">Add Comment</span>
+                <span id="button-spinner" class="spinner-border spinner-border-sm" role="status" style="display: none;"></span>
+            </button>
+        </div>
+
+        <!-- Help Content -->
+        <div id="help-content" class="sidebar-content">
+            <h3>Help</h3>
+            <div class="help-content-container">
+                <!-- Help content will be loaded here -->
+                <p>Loading help content...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    'use strict';
+
+    // ==========================================================================
+    // ==                            INITIALIZATION                            ==
+    // ==========================================================================
+    /** @const {string} logPrefix - Standard prefix for console log messages. */
+    const logPrefix = '[CombinedSidebar]';
+    console.log(`${logPrefix} Script Initializing...`);
+
+    // ==========================================================================
+    // ==                           CONFIGURATION                            ==
+    // ==========================================================================
+    /**
+     * SIDEBAR CONFIGURATION TEMPLATE
+     * ------------------------------
+     * Instructions: Replace the placeholder values below with your specific IDs and endpoints.
+     * Each constant is documented to help you understand what information is needed.
+     */
+    
+    // --- Core Sidebar DataSources & API ---
+    /**
+     * @const {string} COMMENT_DATA_SOURCE_ID
+     * The UUID of the data source that contains comment data.
+     * This should be a valid UUID from your data environment.
+     * Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+     */
+    const COMMENT_DATA_SOURCE_ID = 'f2e63e32-c2f3-479a-aaa1-fbb84b50e9ff';
+    
+    /**
+     * @const {string} API_ENDPOINT_DB_MODIFICATIONS
+     * The full URL to your database modification API endpoint.
+     * This endpoint should handle operations like adding, editing, or deleting comments.
+     * Example: https://your-domain.com/api/db_modifications/run
+     */
+    const API_ENDPOINT_DB_MODIFICATIONS = 'https://YOURPORTALURL/api/db_modifications/run';
+    
+    // --- Tableau Context Configuration ---
+    /**
+     * @const {string} TABLEAU_VIZ_ID_FOR_CONTEXT
+     * The HTML element ID of your Tableau visualization.
+     * This is used to get context from the current Tableau view.
+     * Look for an element with id attribute in your Tableau embedding code.
+     */
+    const TABLEAU_VIZ_ID_FOR_CONTEXT = 'content-1-0c8c0f55-dcfc-44bb-aea4-6b79b6f717e9';
+    
+    /**
+     * @const {string} COMMENT_TABLEAU_VIEW_ID
+     * The ID of the specific Tableau view that comments are associated with.
+     * This can be found in the Tableau Server URL when viewing the specific worksheet.
+     * Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+     */
+    const COMMENT_TABLEAU_VIEW_ID = '9aeb9546-9cfa-46a0-93af-8f22d59f5936';
+    
+    /**
+     * @const {string} COMMENT_FILTER_KEY_FOR_COMPLEX
+     * The name of the Tableau filter parameter used to filter comments by organization/complex.
+     * This should match exactly the parameter name in your Tableau workbook.
+     * Example: "Organization", "Department", "Region", etc.
+     */
+    const COMMENT_FILTER_KEY_FOR_COMPLEX = "CLIENT_NAME";
+    
+    // --- Icon Paths ---
+    /**
+     * Icon file paths for various UI elements.
+     * These should be URLs to image files in your web environment.
+     * You can replace these with your own custom icons.
+     * Recommended format: PNG or SVG with transparent background.
+     */
+    const INFO_ICON_PATH = '/auth/asset_manager/files/approval_comments/Info Icon.png';
+    const EDIT_ICON_PATH = '/auth/asset_manager/files/approval_comments/Pencil icon.png';
+    const DELETE_ICON_PATH = '/auth/asset_manager/files/approval_comments/Trashcan icon.png';
+
+    // ==========================================================================
+    // ==                         DOM ELEMENT REFERENCES                       ==
+    // ==========================================================================
+    /**
+     * DOM ELEMENT REFERENCES
+     * ----------------------
+     * This section caches references to critical DOM elements used by the sidebar.
+     * All elements must exist in the HTML for the sidebar to function properly.
+     * If any critical element is missing, the script will abort initialization.
+     */
+    
+    // --- Main Sidebar Elements ---
+    /**
+     * @const {HTMLElement} sidebar - The main sidebar container element.
+     * This should be a div with the ID 'combined-sidebar' in your HTML.
+     * This element will be shown/hidden when toggling the sidebar.
+     */
+    const sidebar = document.getElementById('combined-sidebar');
+    
+    /**
+     * @const {HTMLElement} commentIcon - The icon that toggles the comment section.
+     * This should be an element with the ID 'comment-icon' in your HTML.
+     * Clicking this icon will show the comments panel.
+     */
+    const commentIcon = document.getElementById('comment-icon');
+    
+    /**
+     * @const {HTMLElement} helpIcon - The icon that toggles the help section.
+     * This should be an element with the ID 'help-icon' in your HTML.
+     * Clicking this icon will show the help documentation.
+     */
+    const helpIcon = document.getElementById('help-icon');
+    
+    /**
+     * @const {HTMLElement} closeSidebarIcon - The icon that closes the sidebar.
+     * This should be an element with the ID 'close-sidebar-icon' in your HTML.
+     * Clicking this icon will hide the entire sidebar.
+     */
+    const closeSidebarIcon = document.getElementById('close-sidebar-icon');
+    
+    // --- Content Sections ---
+    /**
+     * @const {HTMLElement} commentContent - Container for the comments section content.
+     * This should be an element with the ID 'comment-content' in your HTML.
+     * This element will be shown when the comment icon is clicked.
+     */
+    const commentContent = document.getElementById('comment-content');
+    
+    /**
+     * @const {HTMLElement} helpContent - Container for the help section content.
+     * This should be an element with the ID 'help-content' in your HTML.
+     * This element will be shown when the help icon is clicked.
+     */
+    const helpContent = document.getElementById('help-content'); 
+    
+    /**
+     * @const {HTMLElement} commentsGrid - Container for the list of comments.
+     * This should be an element with the ID 'comments-grid' in your HTML.
+     * Comments will be dynamically inserted into this element.
+     */
+    const commentsGrid = document.getElementById('comments-grid');
+    
+    // --- Comment Action Elements ---
+    /**
+     * @const {HTMLElement} addCommentBtn - Button for adding a new comment.
+     * This should be a button with the ID 'add-comment-btn' in your HTML.
+     * Clicking this button will open the add comment form/modal.
+     */
+    const addCommentBtn = document.getElementById('add-comment-btn');
+    
+    /**
+     * @const {HTMLElement} addCommentBtnText - Text element inside the add comment button.
+     * This should be an element with the ID 'button-text' in your HTML.
+     * This element will be hidden during loading states.
+     */
+    const addCommentBtnText = document.getElementById('button-text');
+    
+    /**
+     * @const {HTMLElement} addCommentBtnSpinner - Loading spinner inside the add comment button.
+     * This should be an element with the ID 'button-spinner' in your HTML.
+     * This element will be shown during loading states.
+     */
+    const addCommentBtnSpinner = document.getElementById('button-spinner');
+    
+    // --- Critical Element Check ---
+    /**
+     * Validates that all required DOM elements exist before proceeding.
+     * If any critical element is missing, the script will log an error and abort.
+     * This prevents JavaScript errors when trying to access non-existent elements.
+     */
+    const criticalElementsExist = sidebar && commentIcon && closeSidebarIcon && commentContent && 
+                                 commentsGrid && addCommentBtn && addCommentBtnText && addCommentBtnSpinner;
+    if (!criticalElementsExist) {
+      console.error(`${logPrefix} Critical sidebar element(s) missing. Initialization aborted.`);
+      alert("Error: Sidebar UI elements are missing. Sidebar cannot function.");
+      return; // Stop script execution
+    }
+    
+    // ==========================================================================
+    // ==                            STATE VARIABLES                           ==
+    // ==========================================================================
+    /**
+     * STATE VARIABLES
+     * ---------------
+     * These variables maintain the internal state of the sidebar application.
+     * They track data, user permissions, and UI state throughout the sidebar's lifecycle.
+     */
+    
+    /**
+     * @var {Array|null} commentDataCache - Cached comment data from the server.
+     * Stores the processed comment data ready for display.
+     * Null indicates comments haven't been loaded yet.
+     */
+    let commentDataCache = null;
+    
+    /**
+     * @var {Array|null} cachedCommentObjects - Raw comment data objects from the server.
+     * Used for lookups when editing or referencing specific comments.
+     * Preserves all fields from the original data source.
+     */
+    let cachedCommentObjects = null;
+    
+    /**
+     * @var {boolean} showingAllComments - Flag for comment pagination state.
+     * When false, only shows the initial set of comments.
+     * When true, all comments are displayed (after "View More" is clicked).
+     */
+    let showingAllComments = false;
+    
+    /**
+     * @var {boolean} userCanEditComments - User permission flag for comment operations.
+     * When true, the user can add, edit, and delete comments.
+     * When false, the user can only view comments.
+     */
+    let userCanEditComments = false;
+    
+    /**
+     * @var {string|null} endMonthParameter - The end month parameter from Tableau.
+     * Used for filtering comments by date range.
+     * Format is typically YYYY-MM-DD.
+     */
+    let endMonthParameter = null;
+    
+    /**
+     * @var {string|null} tableauViewId - The current Tableau view ID.
+     * Retrieved from Tableau context, falls back to the constant if not available.
+     * Used to associate comments with specific Tableau views.
+     */
+    let tableauViewId = null;
+    
+    /**
+     * @var {Object} uniqueFilters - Processed active filters from Tableau.
+     * Keys are filter names, values are arrays of selected filter values.
+     * Used to filter comments by the current Tableau context.
+     */
+    let uniqueFilters = {};
+    
+    /**
+     * @var {Object|null} userComplexMappingCache - Cache for user-to-complex mapping data.
+     * Maps user IDs to their associated complexes/organizations.
+     * Used for permission checks and filtering.
+     */
+    let userComplexMappingCache = null;
+    
+    /**
+     * @var {HTMLElement|null} activeSidebarIcon - Reference to the currently active sidebar icon.
+     * Used for styling (highlighting) the active section.
+     * Null when no section is active.
+     */
+    let activeSidebarIcon = null;
+    
+    // ==========================================================================
+    // ==                         UTILITY / HELPER FUNCTIONS                   ==
+    // ==========================================================================
+    /**
+     * UTILITY / HELPER FUNCTIONS
+     * --------------------------
+     * These functions provide common utilities used throughout the sidebar application.
+     * They handle formatting, ID generation, UI state management, and API interactions.
+     */
+    
+    // --- Formatting Functions ---
+    /**
+     * Formats a date string or object into "Month YYYY" (e.g., "January 2024").
+     * Uses UTC to avoid timezone shifts affecting the month/year.
+     * 
+     * @param {string|Date} dateInput - The date string (YYYY-MM-DD or ISO) or Date object.
+     * @returns {string} Formatted date string or 'N/A'.
+     * 
+     * @example
+     * // Returns "January 2024"
+     * formatCalendarMonth("2024-01-15");
+     * 
+     * @example
+     * // Returns "March 2025"
+     * formatCalendarMonth(new Date("2025-03-10T12:00:00Z"));
+     */
+    function formatCalendarMonth(dateInput) {
+      const logPrefixFunc = '[formatCalendarMonth]';
+      if (!dateInput) return 'N/A';
+      try {
+        let date;
+        if (dateInput instanceof Date) {
+          date = dateInput;
+        } else if (typeof dateInput === 'string') {
+          const datePart = dateInput.split('T')[0]; // Get YYYY-MM-DD part
+          const [year, month, day] = datePart.split('-');
+          // Use UTC to avoid timezone issues when only year/month/day are relevant
+          date = new Date(Date.UTC(parseInt(year, 10), parseInt(month, 10) - 1, 1)); // Day is irrelevant, use 1
+        } else {
+          throw new Error("Invalid input type");
+        }
+        if (isNaN(date.getTime())) throw new Error("Invalid date created");
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        return `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+      } catch (e) {
+        console.error(`${logPrefixFunc} Error formatting calendar month:`, dateInput, e);
+        return typeof dateInput === 'string' ? dateInput : 'N/A'; // Return original string or N/A on error
+      }
+    }
+    
+    /**
+     * Formats a date string or object into "Mmm YYYY" (e.g., "Jan 2024").
+     * Uses UTC to avoid timezone shifts affecting the month/year.
+     * 
+     * @param {string|Date} dateInput - The date string (YYYY-MM-DD or ISO) or Date object.
+     * @returns {string} Formatted date string or 'N/A'.
+     * 
+     * @example
+     * // Returns "Jan 2024"
+     * formatMonthYear("2024-01-15");
+     * 
+     * @example
+     * // Returns "Mar 2025"
+     * formatMonthYear(new Date("2025-03-10T12:00:00Z"));
+     */
+    function formatMonthYear(dateInput) {
+      const logPrefixFunc = '[formatMonthYear]';
+      if (!dateInput) return 'N/A';
+      try {
+        let date;
+        if (dateInput instanceof Date) {
+          date = dateInput;
+        } else if (typeof dateInput === 'string') {
+          const datePart = dateInput.split('T')[0]; // Get YYYY-MM-DD part
+          const [year, month] = datePart.split('-');
+          // Use UTC to avoid timezone issues
+          date = new Date(Date.UTC(parseInt(year, 10), parseInt(month, 10) - 1, 1)); // Day is irrelevant, use 1
+        } else {
+           throw new Error("Invalid input type");
+        }
+        if (isNaN(date.getTime())) throw new Error("Invalid date created");
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${months[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+      } catch (e) {
+        console.error(`${logPrefixFunc} Error formatting date:`, dateInput, e);
+        return typeof dateInput === 'string' ? dateInput : 'N/A'; // Return original string or N/A on error
+      }
+    }
+    
+    /**
+     * Formats a timestamp string or Date object into a user-friendly string
+     * HARDCODED to UTC-4.
+     * WARNING: This will be incorrect during Eastern Standard Time (UTC-5).
+     * Using 'America/New_York' is strongly recommended instead.
+     *
+     * @param {string|Date} timestamp - The timestamp string (ISO format preferred) or Date object.
+     * @returns {string} Formatted timestamp string (e.g., "Apr 15, 2025, 4:47 PM") or original input on error.
+     * 
+     * @example
+     * // Returns "Apr 15, 2025, 4:47 PM" (assuming Eastern Time)
+     * formatTimestamp("2025-04-15T20:47:00Z");
+     */
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      const options = {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true,
+        timeZone: 'America/New_York' // <-- Use this for ET
+      };
+      return date.toLocaleString('en-US', options);
+    }
+    
+    // --- ID & Timestamp Generation ---
+    /**
+     * Generates a standard UUID v4 string.
+     * Uses crypto.randomUUID if available, with Math.random fallback.
+     * 
+     * @returns {string} A new UUID v4.
+     * 
+     * @example
+     * // Returns something like "123e4567-e89b-12d3-a456-426614174000"
+     * const newId = generateCommentId();
+     */
+    function generateCommentId() {
+      // Standard UUID v4 generation using crypto if available, fallback to Math.random
+      if (window.crypto && window.crypto.randomUUID) {
+        return window.crypto.randomUUID();
+      } else {
+        // Fallback for environments without crypto.randomUUID
+        console.warn('[generateCommentId] Using Math.random fallback for UUID generation.');
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      }
+    }
+    
+    /**
+     * Gets the current timestamp in ISO 8601 format (UTC).
+     * Useful for storing consistent timestamps in the database.
+     * 
+     * @returns {string} ISO 8601 timestamp string (e.g., "2025-04-11T14:30:00.000Z").
+     * 
+     * @example
+     * // Returns the current time in ISO format (e.g., "2025-04-11T14:30:00.000Z")
+     * const timestamp = getFormattedTimestamp();
+     */
+    function getFormattedTimestamp() {
+      return new Date().toISOString(); // Use ISO 8601 format (UTC) for consistency
+    }
+    
+    // --- UI Helpers ---
+    /**
+     * Toggles the loading state of a button (disables button, shows/hides text/spinner).
+     * Used to provide visual feedback during asynchronous operations.
+     * 
+     * @param {HTMLButtonElement} buttonElement - The button element.
+     * @param {HTMLElement} textElement - The element containing the button text.
+     * @param {HTMLElement} spinnerElement - The element containing the loading spinner.
+     * @param {boolean} isLoading - True to show loading state, false otherwise.
+     * 
+     * @example
+     * // Show loading state
+     * setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, true);
+     * 
+     * @example
+     * // Hide loading state
+     * setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, false);
+     */
+    function setLoadingState(buttonElement, textElement, spinnerElement, isLoading) {
+      const logPrefixFunc = '[setLoadingState]';
+      if (!buttonElement || !textElement || !spinnerElement) {
+        console.warn(`${logPrefixFunc} Missing elements for setting loading state.`);
+        return;
+      }
+      buttonElement.disabled = isLoading;
+      textElement.style.display = isLoading ? 'none' : 'inline';
+      spinnerElement.style.display = isLoading ? 'inline-block' : 'none';
+    }
+    
+    // --- API Payload Helper ---
+    /**
+     * Creates the standard request body structure for the Zuar Runner DB Modifications API.
+     * Formats parameters according to the API's expected structure.
+     * 
+     * @param {string} modificationName - The name of the DB modification to run.
+     * @param {object} params - An object containing the parameters for the modification.
+     * @returns {object} The request body object.
+     * 
+     * @example
+     * // Returns a properly formatted request body for the API
+     * const body = createRequestBody("add_comment", {
+     *   comment_id: "123e4567-e89b-12d3-a456-426614174000",
+     *   comment_text: "This is a new comment",
+     *   user_id: "user123"
+     * });
+     */
+    function createRequestBody(modificationName, params) {
+      const logPrefixFunc = '[createRequestBody]';
+      console.log(`${logPrefixFunc} Creating body for: ${modificationName} with params:`, params);
+      return {
+        db_modifications: [{
+          name: modificationName,
+          params: params // Parameters should be passed directly as an object
+        }],
+        autocommit: true, // Assuming autocommit is desired
+        ignore_sql_errors: false // Assuming errors should not be ignored
+      };
+    }
+
+    // ==========================================================================
+    // ==                         CORE DATA FETCHING                           ==
+    // ==========================================================================
+    /**
+     * CORE DATA FETCHING
+     * ------------------
+     * This section contains functions for retrieving data from Zuar DataSources.
+     * These functions handle API communication, data transformation, and error handling.
+     */
+    
+    /**
+     * Fetches data from a Zuar DataSource and transforms it into an array of objects.
+     * This is the generalized fetch function used by specific loaders.
+     * 
+     * @param {string} dataSourceId - The UUID of the DataSource to query.
+     * @param {Array<object>} [queries=[{ columns: ["*"] }]] - Query objects specifying columns and sorting.
+     * @param {object} [filters={}] - Filters to apply in Zuar filter object format.
+     * @param {string} [callerLogPrefix='[fetchDataAndMap]'] - Prefix for logging context.
+     * @returns {Promise<{ columns: Array<string>, data: Array<object> }>} Object containing column names and mapped data rows.
+     * @throws {Error} If API call or data processing fails.
+     * 
+     * @example
+     * // Fetch all columns from a data source
+     * const result = await fetchDataAndMap('f2e63e32-c2f3-479a-aaa1-fbb84b50e9ff');
+     * 
+     * @example
+     * // Fetch specific columns with filters
+     * const result = await fetchDataAndMap(
+     *   'f2e63e32-c2f3-479a-aaa1-fbb84b50e9ff',
+     *   [{ columns: ['id', 'name', 'date'] }],
+     *   { date: { operator: '>=', value: '2025-01-01' } }
+     * );
+     */
+    async function fetchDataAndMap(dataSourceId, queries = [{ columns: ["*"] }], filters = {}, callerLogPrefix = '[fetchDataAndMap]') {
+      console.log(`${callerLogPrefix} Fetching & mapping data from DataSource: ${dataSourceId}`);
+      console.log(`${callerLogPrefix} Queries:`, JSON.stringify(queries));
+      console.log(`${callerLogPrefix} Filters:`, JSON.stringify(filters));
+    
+      // Check if the Zuar Portal API is available
+      if (!window.zPortal?.dataSource?.fetchResults) {
+        console.error(`${callerLogPrefix} zPortal.dataSource.fetchResults is not available.`);
+        throw new Error("Zuar Portal API (fetchResults) is not available.");
+      }
+    
+      try {
+        // Call the Zuar Portal API with the provided parameters
+        const response = await zPortal.dataSource.fetchResults({
+          dataSourceId: dataSourceId,
+          filters: filters,
+          queries: queries
+        });
+        console.log(`${callerLogPrefix} Raw response received from ${dataSourceId}:`, response);
+    
+        // --- Validate Primary Structure ---
+        // Ensure the response contains the expected columns and results arrays
+        if (!response || !response.columns || !Array.isArray(response.columns) || !response.results || !Array.isArray(response.results)) {
+          console.error(`${callerLogPrefix} Invalid primary data structure received. Expected 'columns' (array) and 'results' (array). Got:`, response);
+          throw new Error("Invalid primary data structure received from fetchResults.");
+        }
+    
+        // Extract column names robustly, handling both object and string column formats
+        const columnNames = response.columns.map(colInfo =>
+          typeof colInfo === 'object' && colInfo !== null && colInfo.hasOwnProperty('name') ? colInfo.name : String(colInfo)
+        );
+        console.log(`${callerLogPrefix} Extracted Column Names:`, columnNames);
+    
+        // --- Handle Empty Results ---
+        // Return early if no data rows were found
+        if (response.results.length === 0) {
+          console.log(`${callerLogPrefix} 'results' array is empty. Returning no data rows.`);
+          return { columns: columnNames, data: [] }; // Return columns and empty data array
+        }
+    
+        // --- Validate First Result Structure ---
+        // Ensure the first result contains a data array
+        const firstResult = response.results[0];
+        if (!firstResult || !Array.isArray(firstResult.data)) {
+          console.error(`${callerLogPrefix} Invalid structure in first result object. Expected 'data' (array). Got:`, firstResult);
+          throw new Error("Invalid structure in first result object from fetchResults.");
+        }
+        console.log(`${callerLogPrefix} Data structure validated. Processing ${firstResult.data.length} rows.`);
+    
+        // --- Map Data Rows to Objects ---
+        // Transform each row array into an object with column names as keys
+        const dataRows = firstResult.data;
+        const mappedData = dataRows.map((row, rowIndex) => {
+          // Skip invalid rows (non-arrays)
+          if (!Array.isArray(row)) {
+            console.warn(`${callerLogPrefix} Skipping row ${rowIndex} due to invalid format. Expected array. Got:`, row);
+            return null; // Skip this row
+          }
+          
+          // Skip rows with mismatched column counts
+          if (row.length !== columnNames.length) {
+            console.warn(`${callerLogPrefix} Skipping row ${rowIndex} due to column/row length mismatch (${columnNames.length} vs ${row.length}). Row:`, row);
+            return null; // Skip this row
+          }
+          
+          // Create an object mapping column names to row values
+          const obj = {};
+          columnNames.forEach((colName, index) => {
+            // Ensure column name is a valid string before using it as a key
+            if (typeof colName === 'string' && colName.length > 0) {
+              obj[colName] = row[index];
+            } else {
+              console.warn(`${callerLogPrefix} Invalid column name at index ${index}. Using index as key.`);
+              obj[`column_${index}`] = row[index]; // Fallback key if column name is invalid
+            }
+          });
+          return obj;
+        }).filter(obj => obj !== null); // Filter out any rows that were skipped (returned null)
+    
+        console.log(`${callerLogPrefix} Mapped data objects for ${dataSourceId}:`, mappedData);
+        return { columns: columnNames, data: mappedData };
+    
+      } catch (error) {
+        console.error(`${callerLogPrefix} Error fetching or mapping data from ${dataSourceId}:`, error.message, error.stack);
+        // Provide a more user-friendly error message if possible
+        const displayError = error.message.includes("Network response not ok") ? "API Error" : "Data Fetch Error";
+        throw new Error(`Failed to fetch/map data from ${dataSourceId}: ${displayError} - ${error.message}`);
+      }
+    }
+    
+    // ==========================================================================
+    // ==                       TABLEAU CONTEXT FETCHING                       ==
+    // ==========================================================================
+    /**
+     * TABLEAU CONTEXT FETCHING
+     * ------------------------
+     * This section contains functions for retrieving context from Tableau visualizations.
+     * These functions extract parameters, filters, and view information to provide context for comments.
+     */
+    
+    /**
+     * Fetches parameters and filters from the configured Tableau visualization.
+     * Updates the global `endMonthParameter`, `tableauViewId`, and `uniqueFilters` variables.
+     * 
+     * @throws {Error} If the Tableau API is unavailable or fetching fails.
+     * 
+     * @example
+     * // Fetch Tableau context and update global state variables
+     * try {
+     *   await fetchTableauData();
+     *   console.log("End Month:", endMonthParameter);
+     *   console.log("View ID:", tableauViewId);
+     *   console.log("Filters:", uniqueFilters);
+     * } catch (error) {
+     *   console.error("Failed to fetch Tableau context:", error);
+     * }
+     */
+    async function fetchTableauData() {
+      const logPrefixFunc = '[fetchTableauData]';
+      console.log(`${logPrefixFunc} Attempting to fetch Tableau data for context...`);
+      
+      // Reset state variables before fetching (except tableauViewId which might persist)
+      endMonthParameter = null;
+      uniqueFilters = {};
+    
+      // Check if the Tableau API is available
+      if (!window.zPortal?.tableau?.getViz) {
+        console.error(`${logPrefixFunc} zPortal.tableau.getViz is not available.`);
+        throw new Error("Zuar Portal Tableau API (getViz) is not available.");
+      }
+    
+      try {
+        // Get the Tableau visualization object
+        const viz = await zPortal.tableau.getViz(TABLEAU_VIZ_ID_FOR_CONTEXT);
+        if (!viz) throw new Error(`Tableau viz with ID '${TABLEAU_VIZ_ID_FOR_CONTEXT}' not found.`);
+        console.log(`${logPrefixFunc} Got Tableau viz object.`);
+    
+        // --- Fetch Parameters ---
+        const parameters = await viz.workbook.getParametersAsync();
+        console.log(`${logPrefixFunc} Retrieved parameters:`, parameters);
+    
+        // Find and process "End Month Parameter"
+        const endMonthParam = parameters.find(param => param.name === "End Month Parameter");
+        if (endMonthParam?.currentValue?.value) {
+          let rawValue = endMonthParam.currentValue.value;
+          console.log(`${logPrefixFunc} ✅ End Month Parameter found (Raw):`, rawValue, `(Type: ${typeof rawValue})`);
+          
+          // Handle Date object input
+          if (rawValue instanceof Date && !isNaN(rawValue)) {
+            // Format Date object to YYYY-MM-DD UTC
+            endMonthParameter = rawValue.toISOString().substring(0, 10);
+            console.log(`${logPrefixFunc} ✅ Formatted End Month Parameter (from Date) to YYYY-MM-DD:`, endMonthParameter);
+          } 
+          // Handle string input
+          else if (typeof rawValue === 'string') {
+            // Accept YYYY-MM-DD format directly
+            if (/^\d{4}-\d{2}-\d{2}/.test(rawValue)) {
+              endMonthParameter = rawValue.substring(0, 10);
+              console.log(`${logPrefixFunc} ✅ Using End Month Parameter string (already YYYY-MM-DD):`, endMonthParameter);
+            } 
+            // Try to parse other string formats
+            else {
+              console.warn(`${logPrefixFunc} ⚠️ End Month Parameter string format might not be YYYY-MM-DD:`, rawValue);
+              try {
+                // Try parsing the string into a Date object
+                const parsedDate = new Date(rawValue);
+                if (!isNaN(parsedDate)) {
+                  endMonthParameter = parsedDate.toISOString().substring(0, 10); // Format parsed date
+                  console.log(`${logPrefixFunc} ✅ Re-formatted End Month Parameter string to YYYY-MM-DD:`, endMonthParameter);
+                } else {
+                  console.warn(`${logPrefixFunc} ⚠️ Could not parse End Month Parameter string into a valid date.`);
+                  endMonthParameter = null; // Set to null if parsing fails
+                }
+              } catch (parseError) {
+                console.warn(`${logPrefixFunc} ⚠️ Error parsing End Month Parameter string:`, parseError);
+                endMonthParameter = null; // Set to null on parsing error
+              }
+            }
+          } 
+          // Handle other types (unexpected)
+          else {
+            console.warn(`${logPrefixFunc} ⚠️ End Month Parameter value is not a Date object or recognizable string:`, rawValue);
+            endMonthParameter = null; // Set to null if type is unexpected
+          }
+        } else {
+          console.warn(`${logPrefixFunc} ⚠️ End Month Parameter not found or has no current value.`);
+          endMonthParameter = null; // Ensure it's null if not found
+        }
+    
+        // Find and process "Tableau View ID" parameter
+        const viewIdParam = parameters.find(param => param.name === 'Tableau View ID');
+        if (viewIdParam?.currentValue?.value && typeof viewIdParam.currentValue.value === 'string') {
+          tableauViewId = viewIdParam.currentValue.value; // Update global variable
+          console.log(`${logPrefixFunc} ✅ Tableau View ID Parameter found and updated:`, tableauViewId);
+        } else {
+          console.warn(`${logPrefixFunc} ⚠️ Tableau View ID Parameter not found, empty, or not a string. Using default or previous value:`, tableauViewId || COMMENT_TABLEAU_VIEW_ID);
+          if (!tableauViewId) { // If it was never set (e.g., first load), use the default constant
+            tableauViewId = COMMENT_TABLEAU_VIEW_ID;
+          }
+        }
+    
+        // --- Fetch Filters ---
+        const activeSheet = viz.workbook.activeSheet;
+        if (activeSheet && typeof activeSheet.getFiltersAsync === 'function') {
+          console.log(`${logPrefixFunc} Getting filters from active sheet: ${activeSheet.name}`);
+          await getAppliedFiltersFromWorksheet(activeSheet); // Call helper to process filters
+          console.log(`${logPrefixFunc} ✅ Applied filters processed:`, uniqueFilters);
+        } else {
+          console.error(`${logPrefixFunc} ❌ Active sheet not found or does not support getFiltersAsync.`);
+          uniqueFilters = {}; // Clear filters if sheet is unavailable
+        }
+      } catch (error) {
+        console.error(`${logPrefixFunc} ❌ Error fetching Tableau data:`, error);
+        // Reset state on error to avoid using stale data
+        endMonthParameter = null;
+        uniqueFilters = {};
+        // Don't reset tableauViewId here, might still be valid from previous fetch or default
+        throw error; // Re-throw the error for upstream handling (e.g., in event listener)
+      }
+    }
+    
+    /**
+     * Helper function to get and process filters from a Tableau worksheet.
+     * Updates the global `uniqueFilters` object, storing only relevant filters.
+     * Focuses on the CLIENT_NAME filter for comment filtering.
+     * 
+     * @param {tableau.Worksheet} sheet - The Tableau worksheet object.
+     * 
+     * @example
+     * // Process filters from the active sheet
+     * const activeSheet = viz.workbook.activeSheet;
+     * await getAppliedFiltersFromWorksheet(activeSheet);
+     * console.log("Processed filters:", uniqueFilters);
+     */
+    async function getAppliedFiltersFromWorksheet(sheet) {
+      const logPrefixFunc = '[getAppliedFilters]';
+      try {
+        // Get all filters from the worksheet
+        const filters = await sheet.getFiltersAsync();
+        console.log(`${logPrefixFunc} Retrieved filters from sheet '${sheet.name}':`, filters);
+        uniqueFilters = {}; // Reset global filters object before processing
+    
+        // Process each filter
+        filters.forEach(filter => {
+          // Ignore filters that are set to "Exclude" mode
+          if (filter.isExcludeMode) {
+            console.log(`${logPrefixFunc} ⚠️ Ignoring excluded filter: ${filter.fieldName}`);
+            return;
+          }
+    
+          // Extract formatted values, ensuring they are strings and filtering out nulls
+          const appliedValues = filter.appliedValues || [];
+          const selectedValues = appliedValues
+            .map(v => v?.formattedValue != null ? String(v.formattedValue) : null)
+            .filter(v => v !== null);
+    
+          // Process the CLIENT_NAME filter (primary filter for comments)
+          if (filter.fieldName === COMMENT_FILTER_KEY_FOR_COMPLEX) {
+            if (selectedValues.length > 0) {
+              uniqueFilters[filter.fieldName] = {
+                name: filter.fieldName,
+                values: selectedValues
+              };
+              console.log(`${logPrefixFunc} ✅ Storing CLIENT_NAME filter with values:`, selectedValues);
+            } else {
+              // No client selected
+              uniqueFilters[filter.fieldName] = {
+                name: filter.fieldName,
+                values: []
+              };
+              console.log(`${logPrefixFunc} ⚠️ CLIENT_NAME filter has no values selected.`);
+            }
+          } 
+          // Store other potentially useful filters
+          else {
+            if (selectedValues.length > 0) {
+              uniqueFilters[filter.fieldName] = {
+                name: filter.fieldName,
+                values: selectedValues
+              };
+              console.log(`${logPrefixFunc} ✅ Storing other active filter: ${filter.fieldName} with values:`, selectedValues);
+            }
+          }
+        });
+    
+        console.log(`${logPrefixFunc} ✅ Finished processing filters. Stored active filters:`, uniqueFilters);
+      } catch (error) {
+        console.error(`${logPrefixFunc} ❌ Error retrieving or processing filters from sheet '${sheet.name}':`, error);
+        uniqueFilters = {}; // Clear filters on error to prevent using stale data
+      }
+    }
+    
+    // ==========================================================================
+    // ==                         DATA COMMENTS MODULE                         ==
+    // ==========================================================================
+    /**
+     * DATA COMMENTS MODULE
+     * --------------------
+     * This module handles the display, creation, editing, and deletion of comments.
+     * It includes functions for rendering comments, showing modal forms, and API interactions.
+     */
+    
+    /**
+     * Renders the comment data into the comments grid.
+     * Handles filtering removed comments, sorting, showing initial vs. all comments,
+     * and adding edit/delete buttons based on user permissions.
+     * 
+     * @param {object} commentResult - The result object from fetchDataAndMap containing { columns, data }.
+     * 
+     * @example
+     * // Render comments from fetched data
+     * const commentData = await fetchDataAndMap(COMMENT_DATA_SOURCE_ID);
+     * renderComments(commentData);
+     */
+    function renderComments(commentResult) {
+      const logPrefixFunc = '[renderComments]';
+      
+      // Verify DOM element exists
+      if (!commentsGrid) { 
+        console.error(`${logPrefixFunc} commentsGrid element reference is missing.`); 
+        return; 
+      }
+    
+      // Validate input data structure
+      if (!commentResult?.data || !commentResult.columns || !Array.isArray(commentResult.data) || !Array.isArray(commentResult.columns)) {
+        console.error(`${logPrefixFunc} Invalid comment data format.`);
+        commentsGrid.innerHTML = '<p class="text-danger">Error loading comments or invalid data format.</p>'; 
+        return;
+      }
+      
+      const { columns, data } = commentResult;
+      commentsGrid.innerHTML = '';
+    
+      // Handle empty data case
+      if (data.length === 0) {
+        commentsGrid.innerHTML = '<p>No comments available.</p>'; 
+        return;
+      }
+    
+      // Verify all required columns exist in the data
+      const requiredCols = ["COMMENT_ID", "_TIMESTAMP", "DATA_CALENDAR_MONTH", "STATE_IND", "COMMENT_TITLE", 
+                            "COMMENT_MESSAGE", "COMMENT_LEVEL", "AUTHOR_NAME", "TABLEAU_FILTER_VALUE", 
+                            "INITIAL_DISPLAY_IND", "AUTHOR_EMAIL", "TABLEAU_VIEW_ID", "TABLEAU_FILTER_NAME"];
+      const missingCols = requiredCols.filter(col => !columns.includes(col));
+      if (missingCols.length > 0) {
+        console.error(`${logPrefixFunc} Comment data missing required column(s): ${missingCols.join(', ')}`);
+        commentsGrid.innerHTML = `<p class="text-danger">Error: Comment data missing required column(s): ${missingCols.join(', ')}.</p>`; 
+        return;
+      }
+    
+      // Cache raw comment objects for later use (e.g., editing)
+      cachedCommentObjects = data;
+    
+      // Filter out removed comments and sort the remaining ones
+      const sortedData = [...data]
+        .filter(comment => comment.STATE_IND !== 'removed')
+        .sort((a, b) => {
+          // First sort by initial display flag (initial comments first)
+          const initialA = a.INITIAL_DISPLAY_IND === true ? 0 : 1;
+          const initialB = b.INITIAL_DISPLAY_IND === true ? 0 : 1;
+          if (initialA !== initialB) return initialA - initialB;
+    
+          // Then sort by month (newest first)
+          const monthA = a.DATA_CALENDAR_MONTH || '';
+          const monthB = b.DATA_CALENDAR_MONTH || '';
+          if (monthA !== monthB) return monthB.localeCompare(monthA);
+    
+          // Finally sort by timestamp (newest first)
+          const dateA = a._TIMESTAMP ? new Date(a._TIMESTAMP) : new Date(0);
+          const dateB = b._TIMESTAMP ? new Date(b._TIMESTAMP) : new Date(0);
+          const timeA = !isNaN(dateA.getTime()) ? dateA.getTime() : 0;
+          const timeB = !isNaN(dateB.getTime()) ? dateB.getTime() : 0;
+          return timeB - timeA;
+        });
+    
+      // Determine which comments to show based on pagination state
+      let commentsToRender;
+      let olderCommentsCount = 0;
+      
+      if (showingAllComments) {
+        // Show all comments when "View More" has been clicked
+        commentsToRender = sortedData;
+      } else {
+        // Show only initial comments by default
+        commentsToRender = sortedData.filter(comment => comment.INITIAL_DISPLAY_IND === true);
+        olderCommentsCount = sortedData.length - commentsToRender.length;
+      }
+    
+      // Handle case where no comments are available to render
+      if (commentsToRender.length === 0) {
+        if (olderCommentsCount > 0 && !showingAllComments) {
+          commentsGrid.innerHTML = `<p>No recent comments. ${olderCommentsCount} older comment(s) exist.</p>`;
+        } else {
+          commentsGrid.innerHTML = '<p>No comments available.</p>';
+        }
+      } else {
+        // Determine if user can edit/delete comments
+        const canEditDelete = userCanEditComments;
+        
+        // Render each comment
+        commentsToRender.forEach(comment => {
+          // Create comment container
+          const commentBox = document.createElement('div');
+          commentBox.className = 'comment-box';
+          commentBox.dataset.commentId = comment.COMMENT_ID;
+        
+          // Create comment header
+          const header = document.createElement('div');
+          const commentLevel = String(comment.COMMENT_LEVEL || 'informational').toLowerCase();
+          header.className = `comment-header level-${commentLevel}`;
+            
+          // Title (top left)
+          const titleSpan = document.createElement('span');
+          titleSpan.className = 'comment-title-display';
+          titleSpan.textContent = comment.COMMENT_TITLE || 'No Title';
+            
+          // Date (top right)
+          const monthSpan = document.createElement('span');
+          monthSpan.className = 'comment-month-display';
+          monthSpan.textContent = formatMonthYear(comment.DATA_CALENDAR_MONTH);
+            
+          // Empty (bottom left)
+          const emptyDiv = document.createElement('div');
+            
+          // Complex (bottom right)
+          const complexDiv = document.createElement('div');
+          complexDiv.className = 'comment-complex-display';
+          complexDiv.textContent = comment.TABLEAU_FILTER_VALUE ? String(comment.TABLEAU_FILTER_VALUE) : '';
+            
+          // Add to header in grid order: top left, top right, bottom left, bottom right
+          header.appendChild(titleSpan);    // grid-area: 1/1
+          header.appendChild(monthSpan);    // grid-area: 1/2
+          header.appendChild(emptyDiv);     // grid-area: 2/1
+          header.appendChild(complexDiv);   // grid-area: 2/2
+        
+          // Create comment body
+          const body = document.createElement('div');
+          body.className = 'comment-body';
+          const messagePara = document.createElement('p');
+          messagePara.className = 'comment-message';
+          messagePara.textContent = comment.COMMENT_MESSAGE || '';
+          body.appendChild(messagePara);
+        
+          // Create comment footer
+          const footer = document.createElement('div');
+          footer.className = 'comment-footer';
+          const authorSpan = document.createElement('span');
+          authorSpan.className = 'comment-author';
+          authorSpan.textContent = `By: ${comment.AUTHOR_NAME || 'Unknown'} on ${formatTimestamp(comment._TIMESTAMP) || ''}`;
+          footer.appendChild(authorSpan);
+        
+          // Add edit/delete buttons if user has permission
+          if (canEditDelete) {
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'comment-actions';
+        
+            // Edit button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-comment-btn action-btn';
+            editBtn.dataset.commentId = comment.COMMENT_ID;
+            editBtn.title = "Edit comment";
+            const editImg = document.createElement('img');
+            editImg.src = EDIT_ICON_PATH;
+            editImg.alt = "Edit";
+            editBtn.appendChild(editImg);
+        
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-comment-btn action-btn';
+            deleteBtn.dataset.commentId = comment.COMMENT_ID;
+            deleteBtn.title = "Delete comment";
+            const deleteImg = document.createElement('img');
+            deleteImg.src = DELETE_ICON_PATH;
+            deleteImg.alt = "Delete";
+            deleteBtn.appendChild(deleteImg);
+        
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+            footer.appendChild(actionsDiv);
+          }
+        
+          // Assemble the comment box
+          commentBox.appendChild(header);
+          commentBox.appendChild(body);
+          commentBox.appendChild(footer);
+          commentsGrid.appendChild(commentBox);
+        });
+      }
+    
+      // Add "View More" button if there are older comments not shown
+      if (olderCommentsCount > 0 && !showingAllComments) {
+        const viewMoreButton = document.createElement('button');
+        viewMoreButton.className = 'view-more-btn btn btn-link';
+        viewMoreButton.textContent = `View ${olderCommentsCount} Older Comment(s)`;
+        viewMoreButton.style.marginTop = '10px';
+        viewMoreButton.addEventListener('click', () => {
+          showingAllComments = true;
+          renderComments(commentResult);
+        });
+        commentsGrid.appendChild(viewMoreButton);
+      }
+    }
+    
+    /**
+     * Shows the modal for adding or editing a comment.
+     * Prefills fields based on mode and provided data/context.
+     * Includes info icons with tooltips.
+     * 
+     * @param {object} [options={}] - Configuration options.
+     * @param {string} [options.mode='add'] - 'add' or 'edit'.
+     * @param {object} [options.commentData={}] - Existing comment data (for edit mode).
+     * @param {object} [options.currentContext={}] - Current Tableau context (complex, month) for prefilling adds.
+     * @returns {Promise<object>} A promise that resolves with the entered comment details on confirmation,
+     *                            or rejects on dismissal or validation failure.
+     * 
+     * @example
+     * // Show modal for adding a new comment
+     * try {
+     *   const commentDetails = await showCommentModal({
+     *     mode: 'add',
+     *     currentContext: { complex: 'Hospital A', month: '2025-04-01' }
+     *   });
+     *   await submitComment(commentDetails);
+     * } catch (error) {
+     *   console.log("User cancelled or validation failed");
+     * }
+     * 
+     * @example
+     * // Show modal for editing an existing comment
+     * try {
+     *   const commentDetails = await showCommentModal({
+     *     mode: 'edit',
+     *     commentData: existingComment
+     *   });
+     *   await submitComment(commentDetails);
+     * } catch (error) {
+     *   console.log("User cancelled or validation failed");
+     * }
+     */
+    function showCommentModal(options = {}) {
+      const logPrefixFunc = '[showCommentModal]';
+      const { mode = 'add', commentData = {}, currentContext = {} } = options;
+      
+      const isEdit = mode === 'edit';
+      const modalTitle = isEdit ? 'Edit Comment' : 'Add Comment';
+      const confirmButtonText = isEdit ? 'Save Changes' : 'Add Comment';
+    
+      // --- Define Inline Styles for Readability ---
+      const formGroupStyle = "margin-bottom: 15px;";
+      const labelStyle = "display: block; margin-bottom: 5px; font-weight: bold;";
+      const plainTextStyle = "padding: 8px 12px; background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; display: inline-block; min-width: 100px; text-align: center;";
+      const inputTextStyle = "width: 100%; box-sizing: border-box; border: 1px solid #ccc; padding: 8px 12px; font-family: inherit;";
+      const textareaStyle = "width: 100%; box-sizing: border-box; border: 1px solid #ccc; padding: 8px 12px; font-family: inherit;";
+      const radioLabelStyle = "font-weight: normal; margin-left: 3px;";
+      const radioContainerStyle = "margin-right: 15px; display: inline-flex; align-items: center;";
+      const tooltipContainerStyle = "position: relative; display: inline-block; vertical-align: middle; margin-left: 8px;";
+      const infoIconStyle = "width: 14px; height: 14px; cursor: help; vertical-align: middle; opacity: 0.7;";
+      const tooltipTextStyle = `
+          visibility: hidden;
+          width: 220px;
+          background-color: #333;
+          color: #fff;
+          text-align: left;
+          border-radius: 5px;
+          padding: 8px 10px;
+          position: absolute;
+          z-index: 10;
+          bottom: 130%;
+          left: 50%;
+          margin-left: -110px;
+          opacity: 0;
+          transition: opacity 0.3s ease-in-out;
+          font-size: 0.9em;
+          font-weight: normal;
+          line-height: 1.4;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      `.replace(/\s+/g, ' ').trim();
+    
+      // Create an empty modal first with placeholder content
+      const modalBody = `
+        <form class="comment-modal-form">
+          <div id="modal-content-placeholder">Loading...</div>
+        </form>`;
+    
+      // Ensure zPortal modal function exists before calling
+      if (!window.zPortal?.modal?.show) {
+          console.error(`${logPrefixFunc} zPortal.modal.show is not available.`);
+          alert("Modal functionality unavailable.");
+          return Promise.reject(new Error("Modal functionality unavailable."));
+      }
+    
+      // Show the modal with placeholder content
+      const modalPromise = zPortal.modal.show({
+          title: modalTitle,
+          body: modalBody,
+          dismissButton: 'Cancel',
+          confirmButton: confirmButtonText,
+          size: 'md'
+      });
+    
+      // After modal is displayed, populate it with actual content
+      setTimeout(() => {
+        // Now do data preparation
+        // Determine prefill values safely, ensuring month is YYYY-MM-DD
+        let prefillMonth = '';
+        if (isEdit && commentData.DATA_CALENDAR_MONTH) {
+            prefillMonth = String(commentData.DATA_CALENDAR_MONTH).substring(0, 10);
+        } else if (!isEdit && currentContext.month) {
+            prefillMonth = String(currentContext.month).substring(0, 10);
+        }
+        
+        // Validate month format
+        if (prefillMonth && !/^\d{4}-\d{2}-\d{2}$/.test(prefillMonth)) {
+            console.warn(`${logPrefixFunc} Invalid month format for prefill: ${prefillMonth}. Clearing.`);
+            prefillMonth = '';
+        }
+    
+        // Prepare data object for modal fields
+        const data = {
+          complex: isEdit ? (commentData.TABLEAU_FILTER_VALUE || 'All') : (currentContext.complex || 'All'),
+          month: prefillMonth,
+          title: isEdit ? (commentData.COMMENT_TITLE || '') : '',
+          message: isEdit ? (commentData.COMMENT_MESSAGE || '') : '',
+          level: isEdit ? (commentData.COMMENT_LEVEL || 'informational') : 'informational'
+        };
+    
+        // Sanitize complex display value for security
+        const displayComplex = String(data.complex || 'All').replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        
+        // Format month for display
+        const displayMonth = formatMonthYear(data.month) || 'N/A';
+    
+        // Find the placeholder and replace it with actual content
+        const placeholder = document.getElementById('modal-content-placeholder');
+        if (placeholder) {
+          placeholder.innerHTML = `
+            <div class="form-group" style="${formGroupStyle}">
+              <label style="${labelStyle}">Client Name:</label>
+              <div style="display: inline-flex; align-items: center;">
+                 <div class="form-control-plaintext" style="${plainTextStyle}">${displayComplex}</div>
+                 <div class="info-tooltip-container" style="${tooltipContainerStyle}">
+                     <img src="${INFO_ICON_PATH}" alt="Info" class="info-icon" style="${infoIconStyle}">
+                      <span class="info-tooltip-text" style="${tooltipTextStyle}">Your comment will be linked to the list of locations associated with your account.</span>
+                 </div>
+              </div>
+            </div>
+            <div class="form-group" style="${formGroupStyle}">
+              <label style="${labelStyle}">Data Month:</label>
+               <div style="display: inline-flex; align-items: center;">
+                  <div class="form-control-plaintext" style="${plainTextStyle}">${displayMonth}</div>
+                  <div class="info-tooltip-container" style="${tooltipContainerStyle}">
+                      <img src="${INFO_ICON_PATH}" alt="Info" class="info-icon" style="${infoIconStyle}">
+                      <span class="info-tooltip-text" style="${tooltipTextStyle}">Your comment will be linked to the most recent closed and approved month by default. To select a different month, change the End Date in the filters panel.</span>
+                  </div>
+              </div>
+              <input type="hidden" id="modal-comment-month-value" value="${data.month || ''}">
+            </div>
+            <div class="form-group" style="${formGroupStyle}">
+              <label for="modal-comment-title" style="${labelStyle}">Title:</label>
+              <input type="text" id="modal-comment-title" value="${data.title || ''}" required class="form-control" style="${inputTextStyle}">
+            </div>
+            <div class="form-group" style="${formGroupStyle}">
+              <label for="modal-comment-message" style="${labelStyle}">Comment:</label>
+              <textarea id="modal-comment-message" rows="4" required class="form-control" style="${textareaStyle}">${data.message || ''}</textarea>
+            </div>
+            <div class="form-group" style="${formGroupStyle}">
+              <label style="${labelStyle}">Level:</label>
+              <div class="form-check form-check-inline" style="${radioContainerStyle}">
+                <input class="form-check-input" type="radio" id="modal-comment-level-info" name="modal-comment-level" value="informational" ${data.level.toLowerCase() === 'informational' ? 'checked' : ''}>
+                <label class="form-check-label" for="modal-comment-level-info" style="${radioLabelStyle}">Informational</label>
+              </div>
+              <div class="form-check form-check-inline" style="${radioContainerStyle}">
+                <input class="form-check-input" type="radio" id="modal-comment-level-warn" name="modal-comment-level" value="warning" ${data.level.toLowerCase() === 'warning' ? 'checked' : ''}>
+                <label class="form-check-label" for="modal-comment-level-warn" style="${radioLabelStyle}">Warning</label>
+              </div>
+            </div>
+          `;
+          
+          // Set up tooltips
+          const activeModal = document.querySelector('.modal.show') || document;
+          const tooltipContainers = activeModal.querySelectorAll('.info-tooltip-container');
+    
+          tooltipContainers.forEach(container => {
+              const tooltipText = container.querySelector('.info-tooltip-text');
+              const infoIcon = container.querySelector('.info-icon');
+    
+              if (tooltipText && infoIcon) {
+                  const showTooltip = () => {
+                      tooltipText.style.visibility = 'visible';
+                      tooltipText.style.opacity = '1';
+                  };
+                  const hideTooltip = () => {
+                      tooltipText.style.visibility = 'hidden';
+                      tooltipText.style.opacity = '0';
+                  };
+    
+                  infoIcon.addEventListener('mouseenter', showTooltip);
+                  infoIcon.addEventListener('mouseleave', hideTooltip);
+              }
+          });
+        } else {
+          console.error(`${logPrefixFunc} Could not find placeholder element to update modal content.`);
+        }
+      }, 100); // Short delay to ensure modal is rendered
+    
+      // Handle the promise resolution or rejection
+      return modalPromise.then(() => {
+        // Extract values from modal fields on confirmation
+        const titleVal = document.getElementById('modal-comment-title')?.value.trim() || '';
+        const messageVal = document.getElementById('modal-comment-message')?.value.trim() || '';
+        const levelElem = document.querySelector('input[name="modal-comment-level"]:checked');
+        const levelVal = levelElem ? levelElem.value : 'informational';
+        const monthVal = document.getElementById('modal-comment-month-value')?.value || '';
+    
+        // Basic Validation
+        if (!titleVal || !messageVal) {
+          const errorMsg = 'Title and Message are required.';
+          if (window.zPortal?.alert) { zPortal.alert(errorMsg); } else { alert(errorMsg); }
+          throw new Error(errorMsg);
+        }
+    
+        // Prepare result object
+        const result = {
+            complex: isEdit ? (commentData.TABLEAU_FILTER_VALUE || 'All') : (currentContext.complex || 'All'),
+            month: monthVal,
+            title: titleVal,
+            message: messageVal,
+            level: levelVal,
+            commentId: isEdit ? commentData.COMMENT_ID : null,
+            // Pass through original fields for edit mode
+            ...(isEdit ? {
+                TABLEAU_VIEW_ID: commentData.TABLEAU_VIEW_ID,
+                AUTHOR_NAME: commentData.AUTHOR_NAME,
+                AUTHOR_EMAIL: commentData.AUTHOR_EMAIL,
+                TABLEAU_FILTER_NAME: commentData.TABLEAU_FILTER_NAME,
+                TABLEAU_FILTER_VALUE: commentData.TABLEAU_FILTER_VALUE
+            } : {})
+        };
+        console.log(`${logPrefixFunc} Modal confirmed. Returning details:`, result);
+        return result;
+      })
+      .catch(error => {
+          if (error?.message === 'Modal dismissed by user') {
+              console.log(`${logPrefixFunc} Comment modal dismissed by user.`);
+          } else if (error?.message === 'Title and Message are required.') {
+              console.log(`${logPrefixFunc} Re-opening modal due to validation failure.`);
+              const optionsWithValues = { ...options };
+              try {
+                  const activeModal = document.querySelector('.modal.show') || document;
+                  const titleEl = activeModal.querySelector('#modal-comment-title');
+                  const messageEl = activeModal.querySelector('#modal-comment-message');
+                  const levelEl = activeModal.querySelector('input[name="modal-comment-level"]:checked');
+                  if (titleEl) optionsWithValues.commentData = { ...optionsWithValues.commentData, COMMENT_TITLE: titleEl.value };
+                  if (messageEl) optionsWithValues.commentData = { ...optionsWithValues.commentData, COMMENT_MESSAGE: messageEl.value };
+                  if (levelEl) optionsWithValues.commentData = { ...optionsWithValues.commentData, COMMENT_LEVEL: levelEl.value };
+              } catch (e) { console.warn("Could not grab values before re-opening modal", e); }
+              showCommentModal(optionsWithValues);
+          } else {
+              console.error(`${logPrefixFunc} Comment modal error or unexpected rejection:`, error);
+          }
+          throw error;
+      });
+    }
+    
+    /**
+     * Submits a new or updated comment to the Zuar Runner API.
+     * 
+     * @param {object} commentDetails - The comment details object returned from `showCommentModal`.
+     * 
+     * Expected fields for the API:
+     * 
+     * For ADD (ADDCOMMENT modification):
+     * - comment_id: UUID - Generated unique identifier for the comment
+     * - tableau_view_id: string - ID of the Tableau view this comment is associated with
+     * - author_name: string - Name of the comment author
+     * - author_email: string - Email of the comment author
+     * - data_calendar_month: string - Month in YYYY-MM-DD format
+     * - tableau_filter_name: string - Name of the filter (typically "CLIENT_NAME")
+     * - tableau_filter_value: string - Value of the filter (complex/organization name)
+     * - comment_title: string - Title of the comment
+     * - comment_message: string - Body text of the comment
+     * - comment_level: string - Level of the comment ("informational" or "warning")
+     * - state_ind: string - State indicator ("active" for new comments)
+     * - _timestamp: string - ISO timestamp of creation
+     * 
+     * For UPDATE (UPDATE_COMMENT modification):
+     * - comment_id: UUID - Identifier of the comment to update
+     * - comment_title: string - Updated title
+     * - comment_message: string - Updated message
+     * - comment_level: string - Updated level
+     * - data_calendar_month: string - Updated month
+     * - _timestamp: string - ISO timestamp of the update
+     * - tableau_view_id: string - Preserved from original comment
+     * - author_name: string - Preserved from original comment
+     * - author_email: string - Preserved from original comment
+     * - tableau_filter_name: string - Preserved from original comment
+     * - tableau_filter_value: string - Preserved from original comment
+     * 
+     * @example
+     * // Add a new comment
+     * const commentDetails = await showCommentModal({ mode: 'add' });
+     * await submitComment(commentDetails);
+     * 
+     * @example
+     * // Edit an existing comment
+     * const commentDetails = await showCommentModal({ 
+     *   mode: 'edit', 
+     *   commentData: existingComment 
+     * });
+     * await submitComment(commentDetails);
+     */
+    async function submitComment(commentDetails) {
+      const logPrefixFunc = '[submitComment]';
+      // console.log(`${logPrefixFunc} Submitting comment with details:`, commentDetails);
+    
+      // Destructure details received from the modal, providing defaults where necessary
+      const {
+          commentId, // Will be null for adds, non-null for edits
+          complex,   // The complex/filter value (e.g., "All" or specific list)
+          month,     // YYYY-MM-DD string or potentially null/empty
+          title,
+          message,
+          level,
+          // Fields below might be needed for edits, passed in commentDetails if editing
+          // These come from the original comment data passed *into* the edit modal
+          TABLEAU_VIEW_ID: existingViewId,
+          AUTHOR_NAME: existingAuthorName,
+          AUTHOR_EMAIL: existingAuthorEmail,
+          TABLEAU_FILTER_NAME: existingFilterName,
+          TABLEAU_FILTER_VALUE: existingFilterValue // This is the 'complex' value for adds
+      } = commentDetails;
+    
+      const isEdit = !!commentId; // Determine if it's an edit based on presence of commentId
+      const modificationName = isEdit ? "UPDATE_COMMENT" : "ADDCOMMENT"; // API modification name
+      const timestamp = getFormattedTimestamp(); // Get current timestamp for add/update
+    
+      let params = {}; // Initialize empty parameters object
+    
+      // --- Prepare Parameters for Edit ---
+      if (isEdit) {
+          console.log(`${logPrefixFunc} Preparing parameters for UPDATE_COMMENT.`);
+          // For edits, we update mutable fields and keep some original context
+          params = {
+              "comment_id": commentId, // Required identifier for the update
+              "comment_title": title,
+              "comment_message": message,
+              "comment_level": String(level).toLowerCase(), // Ensure lowercase
+              "data_calendar_month": month, // Update month if changed in modal
+              "_timestamp": timestamp, // Update timestamp to reflect edit time
+              // Keep original context unless explicitly changed (which isn't supported by modal currently)
+              // Use existing value from original comment data, fallback to current context or default if missing
+              "tableau_view_id": existingViewId || tableauViewId || COMMENT_TABLEAU_VIEW_ID,
+              "author_name": existingAuthorName, // Keep original author
+              "author_email": existingAuthorEmail, // Keep original author email
+              "tableau_filter_name": existingFilterName || COMMENT_FILTER_KEY_FOR_COMPLEX, // Keep original filter name
+              "tableau_filter_value": existingFilterValue // Keep original filter value (complex)
+              // STATE_IND is usually not updated here; handled by deleteComment
+          };
+      }
+      // --- Prepare Parameters for Add ---
+      else {
+         console.log(`${logPrefixFunc} Preparing parameters for ADDCOMMENT.`);
+         const newCommentId = generateCommentId(); // Generate a unique ID for the new comment
+         // Get current user details safely with fallbacks
+         const currentAuthorName = (window.zPortal?.user?.fullname || window.zPortal?.user?.username || 'Unknown User');
+         const currentAuthorEmail = (window.zPortal?.user?.email ? String(window.zPortal.user.email).toLowerCase() : 'unknown@example.com');
+         // Use current Tableau context (fetched view ID or default)
+         const viewIdForAdd = tableauViewId || COMMENT_TABLEAU_VIEW_ID;
+         const filterNameForAdd = COMMENT_FILTER_KEY_FOR_COMPLEX; // Use configured filter key
+    
+         params = {
+             "comment_id": newCommentId,
+             "tableau_view_id": viewIdForAdd,
+             "author_name": currentAuthorName,
+             "author_email": currentAuthorEmail,
+             "data_calendar_month": month, // Use month from modal (YYYY-MM-DD)
+             "tableau_filter_name": filterNameForAdd,
+             "tableau_filter_value": complex, // Use complex value from modal context (could be "All" or specific list)
+             "comment_title": title,
+             "comment_message": message,
+             "comment_level": String(level).toLowerCase(), // Ensure lowercase
+             "state_ind": 'active', // New comments are always active initially
+             "_timestamp": timestamp, // Timestamp of creation
+             // INITIAL_DISPLAY_IND is often set by default in DB or handled by a separate process/trigger
+             // If needed, it could be added here, e.g., "initial_display_ind": true
+         };
+      }
+    
+      const finalApiPayload = createRequestBody(modificationName, params); // Create the final API request body
+      // console.log(`${logPrefixFunc} Prepared Final Comment Payload (${modificationName}):`, JSON.stringify(finalApiPayload, null, 2));
+    
+      // Set loading state for the "Add Comment" button (main entry point for this flow)
+      if (typeof setLoadingState === 'function' && addCommentBtn && addCommentBtnText && addCommentBtnSpinner) {
+          setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, true);
+      } else {
+          console.warn(`${logPrefixFunc} setLoadingState or button elements not available.`);
+      }
+    
+      const apiUrl = API_ENDPOINT_DB_MODIFICATIONS;
+      console.log(`${logPrefixFunc} Sending API request to: ${apiUrl}`);
+    
+      try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+            body: JSON.stringify(finalApiPayload)
+        });
+    
+        let responseData = null;
+        const responseText = await response.text(); // Get text response first
+    
+        // Try parsing JSON if response is OK and text exists
+        if (response.ok && responseText) {
+            try { responseData = JSON.parse(responseText); } catch (e) { console.warn(`${logPrefixFunc} Non-JSON success response:`, responseText); }
+        }
+    
+        // Handle HTTP errors
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status} ${response.statusText}`;
+          if (responseText) { // Try to get more detail from response body
+              try {
+                  const errorJson = JSON.parse(responseText);
+                  const detailError = errorJson?.detail; const modError = errorJson?.[0]?.results?.[0]?.error;
+                  if (detailError && Array.isArray(detailError) && detailError[0]?.msg) errorMessage = detailError[0].msg;
+                  else if (typeof detailError === 'string') errorMessage = detailError;
+                  else if (modError) errorMessage = modError;
+                  else if (errorJson?.message) errorMessage = errorJson.message;
+                  else if (errorJson?.error) errorMessage = errorJson.error;
+                  else errorMessage = responseText.substring(0, 200); // Truncated raw text
+              } catch (e) { errorMessage = responseText.substring(0, 200); } // Truncated raw text on parse error
+          }
+          throw new Error(`Network response not ok: ${errorMessage}`);
+        }
+    
+        // Handle errors reported within the modification result
+        const firstResult = responseData?.[0]?.results?.[0];
+        if (firstResult?.error) {
+          throw new Error(`Comment submission failed: ${firstResult.error}`);
+        }
+    
+        console.log(`${logPrefixFunc} Comment submission successful.`);
+        const successMessage = `Comment ${isEdit ? 'updated' : 'added'} successfully!`;
+        if (window.zPortal?.alert) zPortal.alert(successMessage); else alert(successMessage);
+    
+        // Refresh comment data to show the new/updated comment in the UI
+        if (typeof loadCommentData === 'function') {
+            console.log(`${logPrefixFunc} Triggering comment data refresh.`);
+            await loadCommentData(true); // Force refresh the comment list
+        } else {
+            console.warn(`${logPrefixFunc} loadCommentData function not found. UI may be stale.`);
+            if (window.zPortal?.alert) zPortal.alert("Refresh needed to see changes."); else alert("Refresh needed to see changes.");
+        }
+    
+      } catch (error) {
+        console.error(`${logPrefixFunc} Error ${isEdit ? 'updating' : 'adding'} comment:`, error);
+        const errorMessage = `Error submitting comment: ${error.message}`;
+        if (window.zPortal?.alert) zPortal.alert(errorMessage); else alert(errorMessage);
+      } finally {
+        // Reset loading state for the button regardless of success/failure
+        if (typeof setLoadingState === 'function' && addCommentBtn && addCommentBtnText && addCommentBtnSpinner) {
+            setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, false);
+        }
+      }
+    }
+    
+    /**
+     * Logically deletes a comment by setting its state to 'removed' via the API.
+     * Prompts the user for confirmation before proceeding.
+     * 
+     * @param {string} commentId - The ID of the comment to delete.
+     * 
+     * Expected fields for the API (REMOVE_COMMENT modification):
+     * - COMMENT_ID: UUID - Identifier of the comment to remove
+     * - state_ind: string - Set to "removed" to mark the comment as deleted
+     * 
+     * @example
+     * // Delete a comment after user clicks the delete button
+     * deleteBtn.addEventListener('click', () => {
+     *   const commentId = deleteBtn.dataset.commentId;
+     *   deleteComment(commentId);
+     * });
+     */
+    async function deleteComment(commentId) {
+        const logPrefixFunc = '[deleteComment]';
+        console.log(`${logPrefixFunc} Attempting to delete comment ID: ${commentId}`);
+    
+        if (!commentId) {
+            console.error(`${logPrefixFunc} No comment ID provided for deletion.`);
+            alert("Error: Cannot delete comment without an ID.");
+            return;
+        }
+    
+        // --- Confirmation Dialog ---
+        let confirmDeletion = false;
+        const confirmMessage = "Are you sure you want to delete this comment? This action cannot be undone.";
+        try {
+            // Use zPortal confirm if available, otherwise fallback to standard window.confirm
+            if (window.zPortal?.confirm) {
+                confirmDeletion = await zPortal.confirm(confirmMessage); // Returns true if confirmed, false/rejects if cancelled
+            } else {
+                console.warn(`${logPrefixFunc} zPortal.confirm not available, using window.confirm.`);
+                confirmDeletion = confirm(confirmMessage); // Standard browser confirm
+            }
+        } catch (confirmError) {
+             // Handle cases where zPortal.confirm might reject on dismissal (e.g., user clicks 'Cancel')
+             if (confirmError?.message === 'Modal dismissed by user') {
+                 console.log(`${logPrefixFunc} Deletion cancelled by user via zPortal.confirm dismissal.`);
+                 confirmDeletion = false;
+             } else {
+                 // Log unexpected errors during confirmation
+                 console.error(`${logPrefixFunc} Error during confirmation dialog:`, confirmError);
+                 // As a last resort, try window.confirm if the zPortal one failed unexpectedly
+                 confirmDeletion = confirm(confirmMessage);
+             }
+        }
+    
+        // Stop if user cancelled the deletion
+        if (!confirmDeletion) {
+            console.log(`${logPrefixFunc} Deletion cancelled.`);
+            return;
+        }
+    
+        // --- API Call to Remove Comment ---
+        const modificationName = "REMOVE_COMMENT"; // API modification name for logical delete
+        const params = {
+            "COMMENT_ID": commentId, // Ensure key matches API expectation (case-sensitive)
+            "state_ind": "removed"  // Set state to 'removed'
+        };
+        const finalApiPayload = createRequestBody(modificationName, params);
+        const apiUrl = API_ENDPOINT_DB_MODIFICATIONS;
+    
+        console.log(`${logPrefixFunc} Sending API request to remove comment...`);
+        // Optional: Add loading state indicator (e.g., disable delete button, show spinner)
+    
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+                body: JSON.stringify(finalApiPayload)
+            });
+    
+            let responseData = null;
+            const responseText = await response.text(); // Get text response
+    
+            // Try parsing JSON if response is OK
+            if (response.ok && responseText) {
+                try { responseData = JSON.parse(responseText); } catch (e) { console.warn(`${logPrefixFunc} Non-JSON success response for delete:`, responseText); }
+            }
+    
+            // Handle HTTP errors
+            if (!response.ok) {
+                let errorMessage = `HTTP ${response.status} ${response.statusText}`;
+                if (responseText) { // Try to get more detail
+                    try {
+                        const errorJson = JSON.parse(responseText);
+                        const detailError = errorJson?.detail; const modError = errorJson?.[0]?.results?.[0]?.error;
+                        if (detailError && Array.isArray(detailError) && detailError[0]?.msg) errorMessage = detailError[0].msg;
+                        else if (typeof detailError === 'string') errorMessage = detailError;
+                        else if (modError) errorMessage = modError;
+                        else if (errorJson?.message) errorMessage = errorJson.message;
+                        else if (errorJson?.error) errorMessage = errorJson.error;
+                        else errorMessage = responseText.substring(0, 200); // Truncated raw text
+                    } catch (e) { errorMessage = responseText.substring(0, 200); } // Truncated raw text on parse error
+                }
+                throw new Error(`Network response not ok: ${errorMessage}`);
+                
+            }
+    
+            // Handle errors reported within the modification result
+            const firstResult = responseData?.[0]?.results?.[0];
+            if (firstResult?.error) {
+                throw new Error(`Comment deletion failed: ${firstResult.error}`);
+            }
+    
+            console.log(`${logPrefixFunc} Comment deletion successful.`);
+            const successMessage = "Comment deleted successfully!";
+            if (window.zPortal?.alert) zPortal.alert(successMessage); else alert(successMessage);
+    
+            // Refresh comment data to update the UI
+            if (typeof loadCommentData === 'function') {
+                console.log(`${logPrefixFunc} Triggering comment data refresh.`);
+                await loadCommentData(true); // Force refresh the comment list
+            } else {
+                console.warn(`${logPrefixFunc} loadCommentData function not found. UI may be stale.`);
+                if (window.zPortal?.alert) zPortal.alert("Refresh needed to see changes."); else alert("Refresh needed to see changes.");
+            }
+    
+        } catch (error) {
+            console.error(`${logPrefixFunc} Error deleting comment:`, error);
+            const errorMessage = `Error deleting comment: ${error.message}`;
+            if (window.zPortal?.alert) zPortal.alert(errorMessage); else alert(errorMessage);
+        } finally {
+            // Reset any loading state indicators
+        }
+    }
+    
+    /**
+     * Fetches comment data from the configured DataSource.
+     * Applies filters based on Tableau context if available.
+     * Updates the global `commentDataCache` variable.
+     * 
+     * @param {boolean} [forceRefresh=false] - Whether to force a refresh even if cached data exists.
+     * @returns {Promise<object>} The fetched comment data result object.
+     * 
+     * @example
+     * // Load comments with caching
+     * try {
+     *   const commentData = await loadCommentData();
+     *   console.log(`Loaded ${commentData.data.length} comments`);
+     * } catch (error) {
+     *   console.error("Failed to load comments:", error);
+     * }
+     * 
+     * @example
+     * // Force refresh comments
+     * try {
+     *   const commentData = await loadCommentData(true);
+     *   console.log(`Refreshed ${commentData.data.length} comments`);
+     * } catch (error) {
+     *   console.error("Failed to refresh comments:", error);
+     * }
+     */
+    async function loadCommentData(forceRefresh = false) {
+        const logPrefixFunc = '[loadCommentData]';
+        console.log(`${logPrefixFunc} Loading comment data. Force refresh: ${forceRefresh}`);
+    
+        // Use cached data if available and not forcing refresh
+        if (!forceRefresh && commentDataCache) {
+            console.log(`${logPrefixFunc} Using cached comment data.`);
+            return commentDataCache;
+        }
+    
+        // Set loading state for the comments grid
+        if (commentsGrid) {
+            commentsGrid.innerHTML = '<div class="loading-indicator"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div><p>Loading comments...</p></div>';
+        }
+    
+        try {
+            // Try to fetch Tableau context first (for filtering)
+            try {
+                await fetchTableauContext();
+                console.log(`${logPrefixFunc} Tableau context fetched successfully.`);
+            } catch (tableauError) {
+                console.warn(`${logPrefixFunc} Could not fetch Tableau context. Using default filters.`, tableauError);
+                // Continue with default/empty filters
+            }
+    
+            // Prepare filters based on Tableau context
+            const filters = {};
+            
+            // Add complex filter if available
+            const complexFilter = uniqueFilters[COMMENT_FILTER_KEY_FOR_COMPLEX];
+            if (complexFilter?.values && complexFilter.values.length > 0) {
+                filters.TABLEAU_FILTER_VALUE = { in: complexFilter.values };
+                console.log(`${logPrefixFunc} Adding complex filter:`, filters.TABLEAU_FILTER_VALUE);
+            }
+            
+            // Add month filter if available
+            if (endMonthParameter) {
+                filters.DATA_CALENDAR_MONTH = { eq: endMonthParameter };
+                console.log(`${logPrefixFunc} Adding month filter:`, filters.DATA_CALENDAR_MONTH);
+            }
+            
+            // Add view ID filter if available
+            if (tableauViewId) {
+                filters.TABLEAU_VIEW_ID = { eq: tableauViewId };
+                console.log(`${logPrefixFunc} Adding view ID filter:`, filters.TABLEAU_VIEW_ID);
+            }
+    
+            // Fetch comment data with filters
+            const commentResult = await fetchDataAndMap(
+                COMMENT_DATA_SOURCE_ID,
+                [{ columns: ["*"] }],
+                filters,
+                logPrefixFunc
+            );
+    
+            // Cache the result
+            commentDataCache = commentResult;
+            console.log(`${logPrefixFunc} Comment data loaded and cached. ${commentResult.data.length} comments found.`);
+    
+            // Render the comments
+            renderComments(commentResult);
+            return commentResult;
+    
+        } catch (error) {
+            console.error(`${logPrefixFunc} Error loading comment data:`, error);
+            if (commentsGrid) {
+                commentsGrid.innerHTML = `<p class="text-danger">Error loading comments: ${error.message}</p>`;
+            }
+            throw error;
+        }
+    }
+
+    // ==========================================================================
+    // ==                         HELP CONTENT MODULE                          ==
+    // ==========================================================================
+    /**
+     * Loads and renders the help content for the sidebar.
+     * Provides implementation guidance for developers adapting this code.
+     * 
+     * @example
+     * // Load help content when help tab is selected
+     * helpTabButton.addEventListener('click', loadHelpContent);
+     */
+    function loadHelpContent() {
+        const logPrefixFunc = '[loadHelpContent]';
+        console.log(`${logPrefixFunc} Loading help content.`);
+    
+        if (!helpContent) {
+            console.error(`${logPrefixFunc} Help content element reference is missing.`);
+            return;
+        }
+    
+        // Comprehensive help content with implementation guidance
+        const helpHtml = `
+            <div class="help-section">
+                <h3>Using the Comments Sidebar</h3>
+                <p>This sidebar allows users to add, view, edit, and delete comments associated with your data visualizations.</p>
+                
+                <h4>For Users</h4>
+                <ul>
+                    <li><strong>Adding Comments:</strong> Click "Add Comment" to create a note about the current view.</li>
+                    <li><strong>Viewing Comments:</strong> Comments are displayed with the most recent and important ones first.</li>
+                    <li><strong>Editing/Deleting:</strong> Use the pencil and trash icons if you have permission.</li>
+                    <li><strong>Comment Levels:</strong> Choose between "Informational" (general notes) or "Warning" (requires attention).</li>
+                </ul>
+                
+                <h4>For Developers: Implementation Guide</h4>
+                <p>To adapt this commenting system to your own application:</p>
+                
+                <h5>1. Database Requirements</h5>
+                <ul>
+                    <li><strong>Comments Table:</strong> Create a table with these minimum fields:
+                        <ul>
+                            <li>COMMENT_ID (UUID/primary key)</li>
+                            <li>COMMENT_TITLE (varchar)</li>
+                            <li>COMMENT_MESSAGE (text/varchar)</li>
+                            <li>COMMENT_LEVEL (varchar - 'informational' or 'warning')</li>
+                            <li>AUTHOR_NAME (varchar)</li>
+                            <li>AUTHOR_EMAIL (varchar)</li>
+                            <li>DATA_CALENDAR_MONTH (date/varchar - YYYY-MM-DD format)</li>
+                            <li>TABLEAU_VIEW_ID (varchar - dashboard identifier)</li>
+                            <li>TABLEAU_FILTER_NAME (varchar - e.g., 'CLIENT_NAME')</li>
+                            <li>TABLEAU_FILTER_VALUE (varchar - e.g., specific client/complex)</li>
+                            <li>STATE_IND (varchar - 'active' or 'removed')</li>
+                            <li>_TIMESTAMP (timestamp - creation/update time)</li>
+                            <li>INITIAL_DISPLAY_IND (boolean - for prioritizing display)</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h5>2. Configuration Updates</h5>
+                <ul>
+                    <li><strong>Update Constants:</strong> In the configuration section, modify:
+                        <ul>
+                            <li>COMMENT_DATA_SOURCE_ID: Your data source ID for comments</li>
+                            <li>COMMENT_TABLEAU_VIEW_ID: Default Tableau view ID</li>
+                            <li>COMMENT_FILTER_KEY_FOR_COMPLEX: Filter name (e.g., 'CLIENT_NAME')</li>
+                            <li>API_ENDPOINT_DB_MODIFICATIONS: Your API endpoint for database modifications</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h5>3. API Integration</h5>
+                <ul>
+                    <li><strong>DB Modifications API:</strong> Implement these operations:
+                        <ul>
+                            <li><code>ADDCOMMENT</code>: Creates a new comment record</li>
+                            <li><code>UPDATE_COMMENT</code>: Updates an existing comment</li>
+                            <li><code>REMOVE_COMMENT</code>: Sets STATE_IND to 'removed'</li>
+                        </ul>
+                    </li>
+                    <li><strong>Request Format:</strong> See <code>createRequestBody()</code> function for expected format</li>
+                    <li><strong>Response Format:</strong> API should return success/error in a consistent format</li>
+                </ul>
+                
+                <h5>4. Tableau Integration</h5>
+                <ul>
+                    <li><strong>Embed API:</strong> Use Tableau's JavaScript API to:
+                        <ul>
+                            <li>Get the current view ID via <code>viz.getWorkbook().getActiveSheet().getUrl()</code></li>
+                            <li>Get current filters via <code>viz.getWorkbook().getActiveSheet().getFilters()</code></li>
+                            <li>Get parameters via <code>viz.getWorkbook().getParametersAsync()</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Update <code>fetchTableauContext()</code>:</strong> Modify to match your dashboard's filters and parameters</li>
+                </ul>
+                
+                <h5>5. Authentication & Permissions</h5>
+                <ul>
+                    <li><strong>User Context:</strong> Update how user information is retrieved:
+                        <ul>
+                            <li>Modify references to <code>window.zPortal.user</code> to match your auth system</li>
+                            <li>Update permission checks in <code>userCanEditComments</code> variable</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h5>6. UI Customization</h5>
+                <ul>
+                    <li><strong>Styling:</strong> Update CSS classes in the stylesheet</li>
+                    <li><strong>Icons:</strong> Replace icon paths in the configuration section</li>
+                    <li><strong>Modal:</strong> If not using zPortal, replace modal implementation in <code>showCommentModal()</code></li>
+                </ul>
+                
+                <h5>7. Testing</h5>
+                <ul>
+                    <li>Verify comment creation, editing, and deletion</li>
+                    <li>Test filter synchronization with Tableau</li>
+                    <li>Confirm permissions work correctly</li>
+                    <li>Check responsive behavior on different devices</li>
+                </ul>
+                
+                <h4>Need Technical Assistance?</h4>
+                <p>For implementation questions or troubleshooting:</p>
+                <ul>
+                    <li>Review the code comments for detailed function documentation</li>
+                    <li>Check browser console logs for debugging information</li>
+                    <li>Contact your development team or system administrator</li>
+                </ul>
+            </div>
+        `;
+    
+        helpContent.innerHTML = helpHtml;
+        console.log(`${logPrefixFunc} Help content loaded with implementation guidance.`);
+    }
+    
+    // ==========================================================================
+// ==                         SIDEBAR UI MANAGEMENT                        ==
+// ==========================================================================
+/**
+ * Manages the sidebar UI components, including content visibility, icon states,
+ * and sidebar open/close functionality.
+ * 
+ * The sidebar has two main states:
+ * 1. Collapsed: Only icons are visible
+ * 2. Expanded: Full content is visible alongside icons
+ * 
+ * Content sections (comments, help) can be toggled independently.
+ */
+
+/**
+ * Shows a specific content section and hides others.
+ * Updates the active state of sidebar icons and expands the sidebar.
+ * 
+ * @param {string} contentId - The ID of the content element to show (e.g., 'comment-content', 'help-content')
+ * @param {HTMLElement} iconElement - The icon element that was clicked
+ * 
+ * @example
+ * // Show the comments section when comment icon is clicked
+ * commentIcon.addEventListener('click', () => {
+ *   showContent('comment-content', commentIcon);
+ * });
+ */
+function showContent(contentId, iconElement) {
+    const logPrefixFunc = '[showContent]';
+    console.log(`${logPrefixFunc} Showing content: ${contentId}`);
+
+    // Validate inputs
+    if (!contentId) {
+        console.error(`${logPrefixFunc} No content ID provided.`);
+        return;
+    }
+    
+    if (!iconElement) {
+        console.warn(`${logPrefixFunc} No icon element provided. Active state won't be updated.`);
+    }
+
+    // Get all content sections
+    const contentSections = document.querySelectorAll('.sidebar-content');
+    if (contentSections.length === 0) {
+        console.warn(`${logPrefixFunc} No content sections found with class 'sidebar-content'.`);
+    }
+    
+    // Hide all content sections first
+    contentSections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show the selected content section
+    const selectedContent = document.getElementById(contentId);
+    if (selectedContent) {
+        selectedContent.style.display = 'block';
+        // Ensure content is scrolled to top when shown
+        selectedContent.scrollTop = 0;
+    } else {
+        console.error(`${logPrefixFunc} Content element with ID '${contentId}' not found.`);
+    }
+    
+    // Update active state of icons
+    const icons = document.querySelectorAll('.sidebar-icon');
+    icons.forEach(icon => {
+        icon.classList.remove('active');
+        // Optional: Add aria-pressed attribute for accessibility
+        if (icon.hasAttribute('aria-pressed')) {
+            icon.setAttribute('aria-pressed', 'false');
+        }
+    });
+    
+    // Set the clicked icon as active
+    if (iconElement) {
+        iconElement.classList.add('active');
+        // Optional: Update aria-pressed for accessibility
+        if (iconElement.hasAttribute('aria-pressed')) {
+            iconElement.setAttribute('aria-pressed', 'true');
+        }
+        activeSidebarIcon = iconElement; // Update the active icon reference
+    }
+    
+    // Show the sidebar if it's not already visible
+    if (sidebar) {
+        sidebar.classList.add('open');
+        // Optional: Update aria-expanded for accessibility
+        if (sidebar.hasAttribute('aria-expanded')) {
+            sidebar.setAttribute('aria-expanded', 'true');
+        }
+    } else {
+        console.error(`${logPrefixFunc} Sidebar element reference is missing.`);
+    }
+}
+
+/**
+ * Closes the sidebar by removing the 'open' class.
+ * Also removes the active state from all icons and clears the active icon reference.
+ * 
+ * @example
+ * // Close the sidebar when close button is clicked
+ * closeSidebarIcon.addEventListener('click', closeSidebar);
+ */
+function closeSidebar() {
+    const logPrefixFunc = '[closeSidebar]';
+    console.log(`${logPrefixFunc} Closing sidebar.`);
+    
+    if (sidebar) {
+        sidebar.classList.remove('open');
+        // Optional: Update aria-expanded for accessibility
+        if (sidebar.hasAttribute('aria-expanded')) {
+            sidebar.setAttribute('aria-expanded', 'false');
+        }
+    } else {
+        console.error(`${logPrefixFunc} Sidebar element reference is missing.`);
+        return;
+    }
+    
+    // Remove active state from all icons
+    const icons = document.querySelectorAll('.sidebar-icon');
+    icons.forEach(icon => {
+        icon.classList.remove('active');
+        // Optional: Update aria-pressed for accessibility
+        if (icon.hasAttribute('aria-pressed')) {
+            icon.setAttribute('aria-pressed', 'false');
+        }
+    });
+    
+    activeSidebarIcon = null; // Clear the active icon reference
+}
+
+/**
+ * Toggles the sidebar between open and closed states.
+ * If a specific content section is provided, it will be shown when opening.
+ * 
+ * @param {string} [contentId] - Optional ID of content to show when opening
+ * @param {HTMLElement} [iconElement] - Optional icon element to set as active
+ * 
+ * @example
+ * // Toggle sidebar with comments section
+ * toggleSidebar('comment-content', commentIcon);
+ */
+function toggleSidebar(contentId, iconElement) {
+    const logPrefixFunc = '[toggleSidebar]';
+    console.log(`${logPrefixFunc} Toggling sidebar. Content ID: ${contentId || 'none'}`);
+    
+    if (!sidebar) {
+        console.error(`${logPrefixFunc} Sidebar element reference is missing.`);
+        return;
+    }
+    
+    const isOpen = sidebar.classList.contains('open');
+    
+    if (isOpen) {
+        // If sidebar is open and the clicked icon is already active, close the sidebar
+        if (activeSidebarIcon === iconElement) {
+            closeSidebar();
+        } 
+        // Otherwise, switch to the new content
+        else if (contentId && iconElement) {
+            showContent(contentId, iconElement);
+        }
+    } else {
+        // If sidebar is closed, open it with the specified content
+        if (contentId && iconElement) {
+            showContent(contentId, iconElement);
+        } else {
+            // Just open the sidebar without changing content if no content specified
+            sidebar.classList.add('open');
+            // Optional: Update aria-expanded for accessibility
+            if (sidebar.hasAttribute('aria-expanded')) {
+                sidebar.setAttribute('aria-expanded', 'true');
+            }
+        }
+    }
+}
+
+// ==========================================================================
+// ==                         EVENT LISTENERS                              ==
+// ==========================================================================
+/**
+ * Sets up all event listeners for the sidebar components.
+ * This includes icon clicks, content navigation, and comment actions.
+ * 
+ * Should be called once when the sidebar is initialized.
+ * 
+ * @example
+ * // Initialize sidebar event listeners after DOM is loaded
+ * document.addEventListener('DOMContentLoaded', setupEventListeners);
+ */
+function setupEventListeners() {
+    const logPrefixFunc = '[setupEventListeners]';
+    console.log(`${logPrefixFunc} Setting up event listeners.`);
+
+    // --- Sidebar Navigation Event Listeners ---
+    
+    /**
+     * Comment Icon Click Handler
+     * Shows the comment section and loads comment data
+     */
+    if (commentIcon) {
+        commentIcon.addEventListener('click', async (event) => {
+            console.log(`${logPrefixFunc} Comment icon clicked.`);
+            // Prevent default if it's a link
+            if (event.preventDefault) event.preventDefault();
+            
+            // Toggle sidebar with comment content
+            toggleSidebar('comment-content', commentIcon);
+            
+            // Only load data if sidebar is now open
+            if (sidebar?.classList.contains('open')) {
+                try {
+                    // Show loading state
+                    if (commentsGrid) {
+                        commentsGrid.innerHTML = '<div class="loading-indicator"><div class="spinner-border text-primary" role="status"></div><p>Loading comments...</p></div>';
+                    }
+                    
+                    // Load comment data
+                    await loadCommentData();
+                } catch (error) {
+                    console.error(`${logPrefixFunc} Error loading comment data:`, error);
+                    if (commentsGrid) {
+                        commentsGrid.innerHTML = `<p class="text-danger">Error loading comments: ${error.message}</p>`;
+                    }
+                }
+            }
+        });
+    } else {
+        console.warn(`${logPrefixFunc} Comment icon element reference is missing.`);
+    }
+
+    /**
+     * Help Icon Click Handler
+     * Shows the help section and loads help content
+     */
+    if (helpIcon) {
+        helpIcon.addEventListener('click', (event) => {
+            console.log(`${logPrefixFunc} Help icon clicked.`);
+            // Prevent default if it's a link
+            if (event.preventDefault) event.preventDefault();
+            
+            // Toggle sidebar with help content
+            toggleSidebar('help-content', helpIcon);
+            
+            // Only load help content if sidebar is now open
+            if (sidebar?.classList.contains('open')) {
+                loadHelpContent();
+            }
+        });
+    } else {
+        console.warn(`${logPrefixFunc} Help icon element reference is missing.`);
+    }
+
+    /**
+     * Close Sidebar Icon Click Handler
+     * Closes the sidebar when the close icon is clicked
+     */
+    if (closeSidebarIcon) {
+        closeSidebarIcon.addEventListener('click', (event) => {
+            console.log(`${logPrefixFunc} Close sidebar icon clicked.`);
+            // Prevent default if it's a link
+            if (event.preventDefault) event.preventDefault();
+            closeSidebar();
+        });
+    } else {
+        console.warn(`${logPrefixFunc} Close sidebar icon element reference is missing.`);
+    }
+
+    // --- Comment Action Event Listeners ---
+    
+    /**
+     * Add Comment Button Click Handler
+     * Opens the comment modal for adding a new comment
+     */
+    if (addCommentBtn) {
+        addCommentBtn.addEventListener('click', async () => {
+            console.log(`${logPrefixFunc} Add comment button clicked.`);
+            
+            // Set loading state
+            if (typeof setLoadingState === 'function' && addCommentBtn && addCommentBtnText && addCommentBtnSpinner) {
+                setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, true);
+            }
+            
+            try {
+                // Ensure we have the latest Tableau context
+                try {
+                    await fetchTableauContext();
+                } catch (contextError) {
+                    console.warn(`${logPrefixFunc} Could not refresh Tableau context:`, contextError);
+                    // Continue with existing context
+                }
+                
+                // Prepare current context for the modal
+                const currentContext = {
+                    complex: uniqueFilters[COMMENT_FILTER_KEY_FOR_COMPLEX]?.values?.[0] || 'All',
+                    month: endMonthParameter
+                };
+                
+                console.log(`${logPrefixFunc} Opening comment modal with context:`, currentContext);
+                
+                // Show the comment modal
+                const commentDetails = await showCommentModal({
+                    mode: 'add',
+                    currentContext: currentContext
+                });
+                
+                // Submit the comment if modal was confirmed
+                await submitComment(commentDetails);
+                
+            } catch (error) {
+                if (error?.message === 'Modal dismissed by user') {
+                    console.log(`${logPrefixFunc} Add comment cancelled by user.`);
+                } else {
+                    console.error(`${logPrefixFunc} Error adding comment:`, error);
+                    const errorMessage = `Error adding comment: ${error.message}`;
+                    if (window.zPortal?.alert) zPortal.alert(errorMessage); else alert(errorMessage);
+                }
+            } finally {
+                // Reset loading state
+                if (typeof setLoadingState === 'function' && addCommentBtn && addCommentBtnText && addCommentBtnSpinner) {
+                    setLoadingState(addCommentBtn, addCommentBtnText, addCommentBtnSpinner, false);
+                }
+            }
+        });
+    } else {
+        console.warn(`${logPrefixFunc} Add comment button element reference is missing.`);
+    }
+
+    /**
+     * Comment Grid Event Delegation
+     * Handles clicks on edit and delete buttons within the comments grid
+     * Uses event delegation for efficiency with dynamically created elements
+     */
+    if (commentsGrid) {
+        commentsGrid.addEventListener('click', async (event) => {
+            // Handle edit button clicks
+            if (event.target.closest('.edit-comment-btn')) {
+                const button = event.target.closest('.edit-comment-btn');
+                const commentId = button.dataset.commentId;
+                console.log(`${logPrefixFunc} Edit comment button clicked for comment ID: ${commentId}`);
+                
+                // Set loading state on the button if possible
+                const editIcon = button.querySelector('img');
+                if (editIcon) {
+                    const originalSrc = editIcon.src;
+                    try {
+                        // Replace icon with spinner
+                        editIcon.src = LOADING_SPINNER_PATH;
+                        button.disabled = true;
+                        
+                        // Find the comment data in the cache
+                        const commentData = cachedCommentObjects?.find(comment => comment.COMMENT_ID === commentId);
+                        if (!commentData) {
+                            console.error(`${logPrefixFunc} Comment data not found for ID: ${commentId}`);
+                            alert("Error: Comment data not found.");
+                            return;
+                        }
+                        
+                        // Show the edit modal with the comment data
+                        const updatedDetails = await showCommentModal({
+                            mode: 'edit',
+                            commentData: commentData
+                        });
+                        
+                        // Submit the updated comment if modal was confirmed
+                        await submitComment(updatedDetails);
+                        
+                    } catch (error) {
+                        if (error?.message === 'Modal dismissed by user') {
+                            console.log(`${logPrefixFunc} Edit comment cancelled by user.`);
+                        } else {
+                            console.error(`${logPrefixFunc} Error editing comment:`, error);
+                            const errorMessage = `Error editing comment: ${error.message}`;
+                            if (window.zPortal?.alert) zPortal.alert(errorMessage); else alert(errorMessage);
+                        }
+                    } finally {
+                        // Restore original icon
+                        editIcon.src = originalSrc;
+                        button.disabled = false;
+                    }
+                } else {
+                    // No icon found, proceed without visual feedback
+                    try {
+                        // Find the comment data in the cache
+                        const commentData = cachedCommentObjects?.find(comment => comment.COMMENT_ID === commentId);
+                        if (!commentData) {
+                            console.error(`${logPrefixFunc} Comment data not found for ID: ${commentId}`);
+                            alert("Error: Comment data not found.");
+                            return;
+                        }
+                        
+                        // Show the edit modal with the comment data
+                        const updatedDetails = await showCommentModal({
+                            mode: 'edit',
+                            commentData: commentData
+                        });
+                        
+                        // Submit the updated comment if modal was confirmed
+                        await submitComment(updatedDetails);
+                    } catch (error) {
+                        if (error?.message === 'Modal dismissed by user') {
+                            console.log(`${logPrefixFunc} Edit comment cancelled by user.`);
+                        } else {
+                            console.error(`${logPrefixFunc} Error editing comment:`, error);
+                        }
+                    }
+                }
+            }
+            
+            // Handle delete button clicks
+            if (event.target.closest('.delete-comment-btn')) {
+                const button = event.target.closest('.delete-comment-btn');
+                const commentId = button.dataset.commentId;
+                console.log(`${logPrefixFunc} Delete comment button clicked for comment ID: ${commentId}`);
+                
+                // Set loading state on the button if possible
+                const deleteIcon = button.querySelector('img');
+                if (deleteIcon) {
+                    const originalSrc = deleteIcon.src;
+                    try {
+                        // Replace icon with spinner
+                        deleteIcon.src = LOADING_SPINNER_PATH;
+                        button.disabled = true;
+                        
+                        // Process the delete operation
+                        await deleteComment(commentId);
+                        
+                    } catch (error) {
+                        console.error(`${logPrefixFunc} Error deleting comment:`, error);
+                        const errorMessage = `Error deleting comment: ${error.message}`;
+                        if (window.zPortal?.alert) zPortal.alert(errorMessage); else alert(errorMessage);
+                    } finally {
+                        // Restore original icon
+                        deleteIcon.src = originalSrc;
+                        button.disabled = false;
+                    }
+                } else {
+                    // No icon found, proceed without visual feedback
+                    try {
+                        await deleteComment(commentId);
+                    } catch (error) {
+                        console.error(`${logPrefixFunc} Error deleting comment:`, error);
+                    }
+                }
+            }
+            
+            // Handle "View More" button clicks
+            if (event.target.closest('.view-more-btn')) {
+                const button = event.target.closest('.view-more-btn');
+                console.log(`${logPrefixFunc} View more comments button clicked.`);
+                
+                // Set loading state
+                const originalText = button.textContent;
+                try {
+                    button.textContent = "Loading...";
+                    button.disabled = true;
+                    
+                    // Set flag to show all comments and re-render
+                    showingAllComments = true;
+                    renderComments(commentDataCache);
+                    
+                } catch (error) {
+                    console.error(`${logPrefixFunc} Error showing all comments:`, error);
+                    // Restore button on error
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            }
+        });
+    } else {
+        console.warn(`${logPrefixFunc} Comments grid element reference is missing.`);
+    }
+
+    /**
+     * Keyboard Event Listeners for Accessibility
+     * Handles keyboard navigation and escape key for closing
+     */
+    document.addEventListener('keydown', (event) => {
+        // Close sidebar on Escape key
+        if (event.key === 'Escape' && sidebar?.classList.contains('open')) {
+            console.log(`${logPrefixFunc} Escape key pressed. Closing sidebar.`);
+            closeSidebar();
+        }
+    });
+
+    /**
+     * Window Resize Event Listener
+     * Ensures sidebar layout adjusts properly on window resize
+     */
+    window.addEventListener('resize', () => {
+        // Optional: Add resize handling logic if needed
+        // For example, close sidebar on small screens
+        if (window.innerWidth < 768 && sidebar?.classList.contains('open')) {
+            console.log(`${logPrefixFunc} Window resized below breakpoint. Adjusting sidebar.`);
+            // Implement responsive behavior if needed
+        }
+    });
+
+    console.log(`${logPrefixFunc} All event listeners set up successfully.`);
+}
+// ==========================================================================
+// ==                         INITIALIZATION                               ==
+// ==========================================================================
+/**
+ * Handles the initialization of the sidebar component, including:
+ * - DOM element validation
+ * - Permission checking
+ * - Event listener setup
+ * - Initial data loading
+ * - Error handling and recovery
+ */
+
+/**
+ * Validates that all required DOM elements are present.
+ * Logs warnings for missing elements that might cause issues.
+ * 
+ * @returns {boolean} True if all critical elements exist, false otherwise
+ */
+function validateDomElements() {
+    const logPrefixFunc = '[validateDomElements]';
+    console.log(`${logPrefixFunc} Validating DOM elements...`);
+    
+    // Critical elements (sidebar won't function without these)
+    const criticalElements = [
+        { name: 'sidebar', element: sidebar, description: 'Main sidebar container' },
+        { name: 'commentIcon', element: commentIcon, description: 'Comment section toggle icon' },
+        { name: 'helpIcon', element: helpIcon, description: 'Help section toggle icon' }
+    ];
+    
+    // Important but non-critical elements (reduced functionality without these)
+    const importantElements = [
+        { name: 'closeSidebarIcon', element: closeSidebarIcon, description: 'Close sidebar button' },
+        { name: 'commentsGrid', element: commentsGrid, description: 'Comments display container' },
+        { name: 'helpContent', element: helpContent, description: 'Help content container' },
+        { name: 'addCommentBtn', element: addCommentBtn, description: 'Add comment button' }
+    ];
+    
+    // Check critical elements
+    let criticalElementsMissing = false;
+    criticalElements.forEach(item => {
+        if (!item.element) {
+            console.error(`${logPrefixFunc} Critical element missing: ${item.name} (${item.description})`);
+            criticalElementsMissing = true;
+        }
+    });
+    
+    // Check important elements
+    importantElements.forEach(item => {
+        if (!item.element) {
+            console.warn(`${logPrefixFunc} Important element missing: ${item.name} (${item.description}). Some functionality may be limited.`);
+        }
+    });
+    
+    return !criticalElementsMissing;
+}
+
+/**
+ * Checks user permissions for comment operations.
+ * Sets the global userCanEditComments flag based on user role/permissions.
+ * 
+ * @returns {Promise<boolean>} Promise resolving to true if permissions were successfully checked
+ */
+async function checkUserPermissions() {
+    const logPrefixFunc = '[checkUserPermissions]';
+    console.log(`${logPrefixFunc} Checking user permissions...`);
+    
+    try {
+        // Default permission (all users can add/edit/delete)
+        userCanEditComments = true;
+        
+        // Get user information if available
+        const currentUser = window.zPortal?.user;
+        if (currentUser) {
+            console.log(`${logPrefixFunc} User authenticated as: ${currentUser.username || currentUser.email || 'Unknown'}`);
+            
+            // Example: Check for admin role or specific permission
+            // This can be customized based on your authentication system
+            const isAdmin = currentUser.roles?.includes('admin') || currentUser.isAdmin;
+            const hasCommentPermission = currentUser.permissions?.includes('comments.edit');
+            
+            // For this implementation, we're allowing all authenticated users to edit comments
+            // This can be restricted based on roles/permissions if needed
+            userCanEditComments = true; // or: isAdmin || hasCommentPermission;
+            
+            console.log(`${logPrefixFunc} User can edit comments: ${userCanEditComments}`);
+        } else {
+            console.warn(`${logPrefixFunc} No user information available. Using default permissions.`);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error(`${logPrefixFunc} Error checking user permissions:`, error);
+        // Default to true for permission errors to avoid blocking functionality
+        userCanEditComments = true;
+        return false;
+    }
+}
+
+/**
+ * Initializes the sidebar by validating DOM elements, checking permissions,
+ * setting up event listeners, and performing initial data loading.
+ * 
+ * @returns {Promise<void>}
+ */
+async function initializeSidebar() {
+    const logPrefixFunc = '[initializeSidebar]';
+    console.log(`${logPrefixFunc} Initializing sidebar...`);
+    
+    try {
+        // Step 1: Validate DOM elements
+        const elementsValid = validateDomElements();
+        if (!elementsValid) {
+            throw new Error('Critical DOM elements are missing. Sidebar cannot be initialized.');
+        }
+        
+        // Step 2: Check user permissions
+        await checkUserPermissions();
+        
+        // Step 3: Set up event listeners
+        setupEventListeners();
+        
+        // Step 4: Add accessibility attributes
+        if (sidebar) {
+            sidebar.setAttribute('aria-expanded', 'false');
+            sidebar.setAttribute('role', 'complementary');
+            sidebar.setAttribute('aria-label', 'Dashboard sidebar with comments and help');
+        }
+        
+        if (commentIcon) {
+            commentIcon.setAttribute('aria-pressed', 'false');
+            commentIcon.setAttribute('aria-label', 'Show comments');
+            commentIcon.setAttribute('role', 'button');
+            commentIcon.setAttribute('tabindex', '0');
+        }
+        
+        if (helpIcon) {
+            helpIcon.setAttribute('aria-pressed', 'false');
+            helpIcon.setAttribute('aria-label', 'Show help');
+            helpIcon.setAttribute('role', 'button');
+            helpIcon.setAttribute('tabindex', '0');
+        }
+        
+        // Step 5: Try to pre-fetch Tableau context in the background
+        try {
+            fetchTableauContext().then(() => {
+                console.log(`${logPrefixFunc} Initial Tableau context loaded successfully.`);
+            }).catch(error => {
+                console.warn(`${logPrefixFunc} Initial Tableau context load failed:`, error);
+                // Non-critical error, continue initialization
+            });
+        } catch (contextError) {
+            console.warn(`${logPrefixFunc} Error pre-fetching Tableau context:`, contextError);
+            // Non-critical error, continue initialization
+        }
+        
+        console.log(`${logPrefixFunc} Sidebar initialized successfully.`);
+        
+        // Optional: Show a specific section by default
+        // Uncomment to automatically open a specific section on load
+        // setTimeout(() => showContent('help-content', helpIcon), 500);
+        
+    } catch (error) {
+        console.error(`${logPrefixFunc} Error initializing sidebar:`, error);
+        
+        // Create a fallback error message in the sidebar if possible
+        if (sidebar) {
+            try {
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'sidebar-error';
+                errorMessage.innerHTML = `
+                    <div style="padding: 15px; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin: 10px;">
+                        <h3 style="margin-top: 0;">Sidebar Error</h3>
+                        <p>There was an error initializing the sidebar: ${error.message}</p>
+                        <button id="sidebar-retry-btn" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+                sidebar.appendChild(errorMessage);
+                
+                // Add retry button functionality
+                document.getElementById('sidebar-retry-btn')?.addEventListener('click', () => {
+                    console.log(`${logPrefixFunc} Retry button clicked. Attempting re-initialization...`);
+                    // Remove error message
+                    errorMessage.remove();
+                    // Try initialization again
+                    initializeSidebar();
+                });
+            } catch (uiError) {
+                console.error(`${logPrefixFunc} Failed to display error UI:`, uiError);
+            }
+        }
+        
+        // Show alert only for critical errors that prevent functionality
+        alert("Error initializing sidebar. Please refresh the page and try again.");
+    }
+}
+
+/**
+ * Handles cleanup when the sidebar is being removed or the page is unloaded.
+ * Removes event listeners and performs any necessary cleanup.
+ */
+function cleanupSidebar() {
+    const logPrefixFunc = '[cleanupSidebar]';
+    console.log(`${logPrefixFunc} Cleaning up sidebar resources...`);
+    
+    // Example cleanup code - implement as needed
+    // document.removeEventListener('keydown', keydownHandler);
+    // window.removeEventListener('resize', resizeHandler);
+    
+    // Clear any cached data
+    commentDataCache = null;
+    cachedCommentObjects = null;
+    
+    console.log(`${logPrefixFunc} Sidebar cleanup complete.`);
+}
+
+// Register cleanup handler for page unload
+window.addEventListener('beforeunload', cleanupSidebar);
+
+// Start initialization when the DOM is fully loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeSidebar);
+} else {
+    // DOM already loaded, initialize immediately
+    initializeSidebar();
+}
+
+})(); // End of IIFE (Immediately Invoked Function Expression)
+</script>
+
+
+<script>
+    /*
+    Database Integration for Comments System
+
+This document explains how the database operations integrate with the sidebar comments functionality.
+
+Database Operations Overview
+
+The comments system uses three primary database operations:
+
+Adding Comments (ADDCOMMENT)
+
+Updating Comments (UPDATE_COMMENT)
+
+Removing Comments (REMOVE_COMMENT)
+
+Database Structure
+
+The comments are stored in a table called IGNITE__ZUAR_COMMENTS with the following key fields:
+
+COMMENT_ID: Unique identifier for each comment (UUID)
+
+TABLEAU_VIEW_ID: ID of the Tableau view the comment relates to
+
+AUTHOR_NAME: Name of the comment author
+
+AUTHOR_EMAIL: Email of the comment author
+
+DATA_CALENDAR_MONTH: Month the comment relates to
+
+TABLEAU_FILTER_NAME: Name of the Tableau filter
+
+TABLEAU_FILTER_VALUE: Value of the Tableau filter
+
+COMMENT_TITLE: Title of the comment
+
+COMMENT_MESSAGE: Content of the comment
+
+COMMENT_LEVEL: Level/importance of the comment
+
+STATE_IND: Status of the comment (submitted, updated, removed)
+
+_TIMESTAMP: When the comment was created/modified
+
+Operation Details
+Adding Comments
+
+When a user submits a new comment, the ADDCOMMENT operation:
+
+Generates a new UUID for the comment
+
+Inserts all provided parameters into the database
+
+Sets the state to 'submitted'
+
+Records the current timestamp
+
+INSERT INTO IGNITE__ZUAR_COMMENTS 
+(COMMENT_ID, TABLEAU_VIEW_ID, AUTHOR_NAME, AUTHOR_EMAIL, DATA_CALENDAR_MONTH, 
+TABLEAU_FILTER_NAME, TABLEAU_FILTER_VALUE, COMMENT_TITLE, COMMENT_MESSAGE, 
+COMMENT_LEVEL, STATE_IND, _TIMESTAMP) 
+SELECT UUID_STRING(), :tableau_view_id, :author_name, :author_email, 
+:data_calendar_month, :tableau_filter_name, :tableau_filter_value, 
+:comment_title, :comment_message, :comment_level, 'submitted', CURRENT_TIMESTAMP();
+
+Updating Comments
+
+When a user edits an existing comment, the UPDATE_COMMENT operation:
+
+Updates all fields with the new values
+
+Changes the state to 'updated'
+
+Updates the timestamp
+
+UPDATE IGNITE__ZUAR_COMMENTS 
+SET TABLEAU_VIEW_ID = :tableau_view_id, 
+    AUTHOR_NAME = :author_name, 
+    AUTHOR_EMAIL = :author_email, 
+    DATA_CALENDAR_MONTH = :data_calendar_month, 
+    TABLEAU_FILTER_NAME = :tableau_filter_name, 
+    TABLEAU_FILTER_VALUE = :tableau_filter_value, 
+    COMMENT_TITLE = :comment_title, 
+    COMMENT_MESSAGE = :comment_message, 
+    COMMENT_LEVEL = :comment_level, 
+    STATE_IND = 'updated', 
+    _TIMESTAMP = :_timestamp 
+WHERE COMMENT_ID = :comment_id;
+
+Removing Comments
+
+When a user deletes a comment, the REMOVE_COMMENT operation:
+
+Sets the state to 'removed' (soft delete)
+
+Preserves the comment data for audit purposes
+
+UPDATE IGNITE__ZUAR_COMMENTS 
+SET STATE_IND = 'removed' 
+WHERE COMMENT_ID = :COMMENT_ID;
+
+Integration with Frontend Code
+
+The frontend JavaScript code interacts with these database operations through API calls:
+
+Adding Comments
+async function submitComment(commentDetails) {
+    try {
+        const response = await fetch('/api/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tableau_view_id: commentDetails.viewId,
+                author_name: commentDetails.authorName,
+                author_email: commentDetails.authorEmail,
+                data_calendar_month: commentDetails.month,
+                tableau_filter_name: commentDetails.filterName,
+                tableau_filter_value: commentDetails.filterValue,
+                comment_title: commentDetails.title,
+                comment_message: commentDetails.message,
+                comment_level: commentDetails.level
+            })
+        });
+        
+        // Process response...
+    } catch (error) {
+        console.error('Error submitting comment:', error);
+    }
+}
+
+Updating Comments
+async function updateComment(commentId, commentDetails) {
+    try {
+        const response = await fetch(`/api/comments/${commentId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                comment_id: commentId,
+                tableau_view_id: commentDetails.viewId,
+                author_name: commentDetails.authorName,
+                author_email: commentDetails.authorEmail,
+                data_calendar_month: commentDetails.month,
+                tableau_filter_name: commentDetails.filterName,
+                tableau_filter_value: commentDetails.filterValue,
+                comment_title: commentDetails.title,
+                comment_message: commentDetails.message,
+                comment_level: commentDetails.level,
+                _timestamp: new Date().toISOString()
+            })
+        });
+        
+        // Process response...
+    } catch (error) {
+        console.error('Error updating comment:', error);
+    }
+}
+
+Removing Comments
+async function deleteComment(commentId) {
+    try {
+        const response = await fetch(`/api/comments/${commentId}`, {
+            method: 'DELETE'
+        });
+        
+        // Process response...
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+    }
+}
+
+Access Control
+
+The database operations have different access control settings:
+
+ADDCOMMENT: Restricted to the "admin" group
+
+UPDATE_COMMENT: Restricted to the "admin" group
+
+REMOVE_COMMENT: No group restrictions specified
+
+The frontend code should enforce these same permissions by checking user group membership before allowing these operations.
+
+Implementation Notes
+
+The system uses soft deletes (setting STATE_IND to 'removed') rather than hard deletes to maintain an audit trail.
+
+All operations are timestamped for tracking purposes.
+
+The UUID generation happens at the database level for new comments.
+
+The frontend code needs to map between its field names and the database parameter names.
+*/
+</script>
