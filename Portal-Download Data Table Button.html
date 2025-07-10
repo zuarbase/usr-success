@@ -1,0 +1,333 @@
+<div>
+    <button class="btn btn-primary px-4" id="downloadButton">Download CSV</button>
+
+    <script>
+    /**
+     * DATA TABLE CSV DOWNLOADER
+     * 
+     * This script allows users to download data from tables on the page as CSV files.
+     * It supports multiple data tables with a modal selection interface.
+     * 
+     * Dependencies:
+     * - zPortal API for accessing data sources and displaying modals
+     * - Browser DOM API for element manipulation
+     * - Browser File API for file creation and download
+     */
+
+    //=============================================================================
+    // INITIALIZATION
+    //=============================================================================
+    
+    console.log('Window loaded');
+
+    // Get the download button by its ID
+    const downloadButton = document.getElementById("downloadButton");
+    console.log('Download button found:', downloadButton);
+
+    // Attach click event handler if button exists
+    if (downloadButton) {
+        downloadButton.onclick = showTableSelectionModal;
+        console.log('Event listener attached');
+    } else {
+        console.error('Download button not found');
+    }
+
+    //=============================================================================
+    // TABLE SELECTION & MODAL INTERFACE
+    //=============================================================================
+    
+    /**
+     * Shows a modal dialog for selecting which data table to download
+     * If only one table exists, downloads it directly
+     * If no tables exist, shows an error message
+     */
+    async function showTableSelectionModal() {
+        try {
+            console.log('Table selection modal function called');
+            
+            // Find all data tables on the page
+            let dataTables = findAllDataTables();
+            
+            // Handle case with no data tables
+            if (dataTables.length === 0) {
+                showNoTablesFoundModal();
+                return;
+            }
+            
+            // If only one table exists, download it directly
+            if (dataTables.length === 1) {
+                await fetchDataAndDownloadCSV(
+                    dataTables[0].datasourceId, 
+                    dataTables[0].query, 
+                    dataTables[0].title
+                );
+                return;
+            }
+            
+            // For multiple tables, show selection modal
+            showMultipleTablesSelectionModal(dataTables);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            showErrorModal('Error', 'An error occurred while processing your request.');
+        }
+    }
+
+    /**
+     * Finds all data tables on the current page
+     * @returns {Array} Array of data table objects with metadata
+     */
+    function findAllDataTables() {
+        let blocks = zPortal.page.data.grid.blocks;
+        let dataTables = [];
+        
+        // Iterate through all blocks to find data tables
+        for (const block of blocks) {
+            if (block.type === 'data-table') {
+                // Store table info with index and any identifiable information
+                dataTables.push({
+                    index: dataTables.length,
+                    datasourceId: block.data.__source__,
+                    query: block.data,
+                    // Try to get a title or identifier for the table
+                    title: block.title || block.name || `Data Table ${dataTables.length + 1}`
+                });
+            }
+        }
+        
+        return dataTables;
+    }
+
+    /**
+     * Shows a modal indicating no data tables were found
+     */
+    function showNoTablesFoundModal() {
+        zPortal.modal.show({
+            title: 'No Data Tables Found',
+            body: 'There are no data tables available on this page to download.',
+            confirmButton: 'OK',
+            size: 'md'
+        });
+    }
+
+    /**
+     * Shows a modal with options to select from multiple data tables
+     * @param {Array} dataTables - Array of data table objects
+     */
+    function showMultipleTablesSelectionModal(dataTables) {
+        // Create options for selection as HTML
+        let optionsHtml = '<div class="table-selection-list">';
+        dataTables.forEach(table => {
+            optionsHtml += `
+                <div class="table-option" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;" 
+                     onclick="selectTable(${table.index})">
+                    <strong>${table.title}</strong>
+                </div>
+            `;
+        });
+        optionsHtml += '</div>';
+        
+        // Add a global function to handle selection
+        window.selectTable = function(index) {
+            window.selectedTableIndex = index;
+            zPortal.modal.confirm();
+        };
+        
+        // Show modal with table options
+        let modal = zPortal.modal.show({
+            title: 'Select Data Table to Download',
+            body: `${optionsHtml}`,
+            dismissButton: 'Cancel',
+            confirmButton: 'Download Selected',
+            size: 'md'
+        });
+        
+        // Handle modal result
+        modal.then(async function() {
+            // Modal confirmed - handle the selected table
+            handleTableSelection(dataTables);
+        }).catch(function() {
+            // Modal dismissed
+            console.log('Table selection cancelled');
+            cleanupGlobalHandlers();
+        });
+    }
+
+    /**
+     * Handles the user's table selection after modal confirmation
+     * @param {Array} dataTables - Array of data table objects
+     */
+    async function handleTableSelection(dataTables) {
+        const selectedIndex = window.selectedTableIndex;
+        
+        // Validate selection
+        if (selectedIndex !== undefined && selectedIndex >= 0 && selectedIndex < dataTables.length) {
+            let selectedTable = dataTables[selectedIndex];
+            console.log('Selected table:', selectedTable);
+            
+            // Download the selected table
+            await fetchDataAndDownloadCSV(
+                selectedTable.datasourceId, 
+                selectedTable.query, 
+                selectedTable.title
+            );
+        } else {
+            // No selection was made
+            showErrorModal('Selection Error', 'Please select a table before downloading.');
+        }
+        
+        // Clean up global handlers
+        cleanupGlobalHandlers();
+    }
+
+    /**
+     * Removes global handlers created for the modal
+     */
+    function cleanupGlobalHandlers() {
+        delete window.selectTable;
+        delete window.selectedTableIndex;
+    }
+
+    /**
+     * Shows an error modal with a custom title and message
+     * @param {string} title - Modal title
+     * @param {string} message - Error message to display
+     */
+    function showErrorModal(title, message) {
+        zPortal.modal.show({
+            title: title,
+            body: message,
+            confirmButton: 'OK',
+            size: 'sm'
+        });
+    }
+
+    //=============================================================================
+    // DATA FETCHING & PROCESSING
+    //=============================================================================
+    
+    /**
+     * Fetches data from the selected table and downloads it as CSV
+     * @param {string} datasourceId - ID of the data source
+     * @param {Object} query - Query parameters for the data
+     * @param {string} tableName - Name of the table for the filename
+     */
+    async function fetchDataAndDownloadCSV(datasourceId, query, tableName) {
+        try {
+            console.log('Fetch data and download CSV function called');
+            
+            // Ensure we get all data by setting limit to 0
+            let queryWithNoLimit = {...query, limit: "0"};
+            
+            // Fetch the data from the data source
+            console.log('Fetching data...');
+            let datasource = zPortal.dataSource.get(datasourceId);
+            let filters = Object.assign(
+                {},
+                datasource.getFilters(),
+                datasource.getRangeFilters(),
+            );
+            
+            const jsonData = await zPortal.dataSource.fetchResults({
+                dataSourceId: datasourceId,
+                filters: filters,
+                queries: [queryWithNoLimit]
+            });
+            console.log('Data fetched:', jsonData);
+
+            // Extract and process the data
+            let result = jsonData.results[0];
+            let headers = result.columns.map(c => c.name);
+            let data = result.data;
+            
+            // Convert JSON data to CSV format
+            let csvContent = JSONtoCSV(data, headers);
+            console.log('CSV content generated');
+
+            // Download the CSV file
+            downloadCSV(csvContent, tableName);
+            console.log('Download complete');
+            
+        } catch (error) {
+            console.error('Error:', error);
+            showErrorModal('Download Error', 'An error occurred while downloading the data.');
+        }
+    }
+
+    //=============================================================================
+    // CSV CONVERSION & FILE HANDLING
+    //=============================================================================
+    
+    /**
+     * Escapes comma characters in CSV values
+     * @param {*} value - The value to escape
+     * @returns {*} The escaped value
+     */
+    function escapeComma(value) {
+        if (value !== null) {
+            if (typeof value === 'string' && value.includes(',')) {
+                return `"${value}"`;
+            }
+        }
+        return value;
+    }
+    
+    /**
+     * Converts JSON array data to CSV string format
+     * @param {Array} jsonArray - Array of data rows
+     * @param {Array} headers - Array of column headers
+     * @returns {string} CSV formatted string
+     */
+    function JSONtoCSV(jsonArray, headers) {
+        if (jsonArray.length === 0) return "";
+
+        console.log('Converting JSON array to CSV string');
+        
+        // Convert each row to CSV format
+        let csvRows = jsonArray.map(row => row.map(escapeComma).join(","));
+        
+        // Add headers to the top
+        csvRows.unshift(headers.join(","));
+        
+        // Replace newlines with escaped characters
+        csvRows = csvRows.map(row => row.replace(/\n/g, "\\n").replace(/\r/g, "\\r"));
+        
+        // Join rows with newlines
+        return csvRows.join("\n");
+    }
+
+    /**
+     * Creates and triggers download of CSV file
+     * @param {string} csvContent - CSV content to download
+     * @param {string} tableName - Name of the table for the filename
+     */
+    function downloadCSV(csvContent, tableName) {
+        console.log('Creating Blob for CSV content');
+        
+        // Create a Blob with the CSV content
+        const blob = new Blob([csvContent], {type: 'text/csv;charset=utf-8;'});
+
+        // Create a link element for the download
+        const link = document.createElement('a');
+
+        // Generate timestamp for the filename
+        const timestamp = new Date().toLocaleString().replace(/[\/:.,\s]/g, '-');
+        
+        // Use table name in the filename, sanitize it for file system
+        const sanitizedTableName = tableName.replace(/[\\/:*?"<>|]/g, '_');
+        const filename = `${sanitizedTableName}_${timestamp}.csv`;
+        
+        // Set link attributes
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+
+        // Trigger the download by simulating a click
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log(`File "${filename}" download triggered`);
+    }
+    </script>
+</div>
